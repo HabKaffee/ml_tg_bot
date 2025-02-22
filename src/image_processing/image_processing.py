@@ -1,18 +1,28 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
-from PIL import Image
+from typing import List, Tuple, Callable
+
 import cv2
 import numpy as np
+from PIL import Image
+
 from .mapping import ImageCommandsParser
+
 
 class ImageProcessor(ABC):
     @abstractmethod
     def get_processed_image(self, image: Image.Image, text: str) -> Image.Image: ...
     @abstractmethod
-    def _apply_commands(self, image, commands: List[Tuple[str, List[str], callable]]): ...
+    def _apply_commands(self,
+                        image,
+                        commands: List[Tuple[str, List[str], Callable]]
+    ) -> Image.Image: ...
+
 
 class ImageProcessorByText(ImageProcessor):
-    def _apply_commands(self, image, commands: List[Tuple[str, List[str], callable]]):
+    def _apply_commands(self,
+                        image,
+                        commands: List[Tuple[str, List[str], Callable]]
+    ) -> Image.Image:
         for command, params, func in commands:
             if command == "resize":
                 width, height = map(int, params)
@@ -57,4 +67,4 @@ class ImageProcessorByText(ImageProcessor):
 
     def get_processed_image(self, image: Image.Image, text: str) -> Image.Image:
         commands = ImageCommandsParser(text).get_commands()
-        return  self._apply_commands(image, commands)
+        return self._apply_commands(image, commands)

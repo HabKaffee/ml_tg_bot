@@ -1,13 +1,15 @@
 import re
-from typing import List, Tuple
+from typing import Any, List, Tuple
+
 from .patterns import CommandsPatterns, ImageProcessCommands
+
 
 class ImageCommandsParser:
     def __init__(self, text: str):
         self.text = text.lower()
         self.commands = self._parse_commands()
 
-    def _parse_commands(self) -> List[Tuple[str, List[str]]]:
+    def _parse_commands(self) -> List[Tuple[str, List[Any], Any]]:
         patterns = CommandsPatterns().get_commands()
         commands = []
         for command, data in patterns.items():
@@ -21,5 +23,5 @@ class ImageCommandsParser:
                     commands.append((command, [match], function))
         return commands
 
-    def get_commands(self) -> List[Tuple[str, List[str]]]:
+    def get_commands(self) -> List[Tuple[str, List[Any], Any]]:
         return self.commands
