@@ -12,7 +12,6 @@ class ImageProcessor(ABC):
     def _apply_commands(self, image, commands: List[Tuple[str, List[str], callable]]): ...
 
 class ImageProcessorByText(ImageProcessor):
-
     def _apply_commands(self, image, commands: List[Tuple[str, List[str], callable]]):
         for command, params, func in commands:
             if command == "resize":
@@ -29,7 +28,7 @@ class ImageProcessorByText(ImageProcessor):
             elif command == "flip":
                 mode = 1 if params[0] == "горизонтально" else 0
                 image = func(image, mode)
-            elif command == "brightness" or command == "contrast":
+            elif command in ("brightness", "contrast"):
                 alpha = 1.0 + int(params[0]) / 100.0
                 image = func(image, alpha=alpha, beta=0)
             elif command == "crop":
@@ -51,7 +50,6 @@ class ImageProcessorByText(ImageProcessor):
                 image = func(image, cv2.COLOR_BGR2HSV)
             elif command == "hue":
                 image = func(image, cv2.COLOR_BGR2HSV)
-            elif command == "gamma":
                 gamma = float(params[0])
                 table = np.array([(i / 255.0) ** gamma * 255 for i in range(256)]).astype("uint8")
                 image = func(image, table)
