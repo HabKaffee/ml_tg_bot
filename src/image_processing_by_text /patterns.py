@@ -1,10 +1,9 @@
 from enum import Enum
-from typing import Dict
 import cv2
 
 class ImageProcessCommands(Enum):
     PATTERN = "pattern"
-    COMMAND = "command" 
+    COMMAND = "command"
 
 class CommandsPatterns:
     def get_commands(self):
