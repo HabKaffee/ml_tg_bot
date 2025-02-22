@@ -8,59 +8,56 @@ class ImageProcessCommands(Enum):
     COMMAND = "command"
 
 
+class Commands(Enum):
+    RESIZE = "resize"
+    ROTATE = "rotate"
+    FLIP = "flip"
+    BRIGHTNESS = "brightness"
+    CONTRAST = "contrast"
+    CROP = "crop"
+    GRAYSCALE = "grayscale"
+    INVERT = "invert"
+    BLUR = "blur"
+    SHARPEN = "sharpen"
+    SATURATION = "saturation"
+    HUE = "hue"
+    GAMMA = "gamma"
+
+
 class CommandsPatterns:
     def get_commands(self):
         return {
-            "resize": {
+            Commands.RESIZE: {
                 ImageProcessCommands.PATTERN: r"изменить размер до (\d+)x(\d+)",
-                ImageProcessCommands.COMMAND: cv2.resize,
             },
-            "rotate": {
+            Commands.ROTATE: {
                 ImageProcessCommands.PATTERN: r"повернуть на (-?\d+) градусов",
-                ImageProcessCommands.COMMAND: cv2.rotate,
             },
-            "flip": {
+            Commands.FLIP: {
                 ImageProcessCommands.PATTERN: r"отразить (горизонтально|вертикально)",
-                ImageProcessCommands.COMMAND: cv2.flip,
             },
-            "brightness": {
+            Commands.BRIGHTNESS: {
                 ImageProcessCommands.PATTERN: r"изменить яркость на (-?\d+)",
-                ImageProcessCommands.COMMAND: cv2.convertScaleAbs,
             },
-            "contrast": {
+            Commands.CONTRAST: {
                 ImageProcessCommands.PATTERN: r"изменить контрастность на (-?\d+)",
-                ImageProcessCommands.COMMAND: cv2.convertScaleAbs,
             },
-            "crop": {
+            Commands.CROP: {
                 ImageProcessCommands.PATTERN: r"обрезать до (\d+)x(\d+)",
-                ImageProcessCommands.COMMAND: cv2.getRectSubPix,
             },
-            "grayscale": {
+            Commands.GRAYSCALE: {
                 ImageProcessCommands.PATTERN: r"преобразовать в черно-белый",
-                ImageProcessCommands.COMMAND: cv2.cvtColor,
             },
-            "invert": {
+            Commands.INVERT: {
                 ImageProcessCommands.PATTERN: r"инвертировать цвета|инвертировать",
-                ImageProcessCommands.COMMAND: cv2.bitwise_not,
             },
-            "blur": {
+            Commands.BLUR: {
                 ImageProcessCommands.PATTERN: r"размытие с радиусом (\d+)",
-                ImageProcessCommands.COMMAND: cv2.GaussianBlur,
             },
-            "sharpen": {
+            Commands.SHARPEN: {
                 ImageProcessCommands.PATTERN: r"повысить резкость на (-?\d+)",
-                ImageProcessCommands.COMMAND: cv2.filter2D,
             },
-            "saturation": {
-                ImageProcessCommands.PATTERN: r"изменить насыщенность на (-?\d+)",
-                ImageProcessCommands.COMMAND: cv2.cvtColor,
-            },
-            "hue": {
-                ImageProcessCommands.PATTERN: r"изменить оттенок на (-?\d+) градусов",
-                ImageProcessCommands.COMMAND: cv2.cvtColor,
-            },
-            "gamma": {
+            Commands.GAMMA: {
                 ImageProcessCommands.PATTERN: r"изменить гамму на (-?\d+)",
-                ImageProcessCommands.COMMAND: cv2.LUT,
             },
         }
