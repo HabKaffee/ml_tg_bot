@@ -20,6 +20,6 @@ class ImageCommandsParser:
                 else:
                     commands.append((command, [match], function))
         return commands
-    
+
     def get_commands(self) -> List[Tuple[str, List[str]]]:
         return self.commands
