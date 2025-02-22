@@ -2,8 +2,6 @@ from src.image_processing.image_processing import ImageProcessorByText
 from src.image_processing.random_image import get_random_cat_image
 
 
-
-
 def main() -> None:
     random_cat_image = get_random_cat_image()
     processor = ImageProcessorByText()
