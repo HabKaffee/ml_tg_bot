@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Callable, List, Tuple
 
 import numpy as np
-from cv2 import cv2
+import cv2
 from PIL import Image
 
 from .mapping import ImageCommandsParser
@@ -53,6 +53,7 @@ class ImageProcessorByText(ImageProcessor):
                     gamma = float(params[0])
                     table = np.array([(i / 255.0) ** gamma * 255 for i in range(256)]).astype("uint8")
                     image = func(image, table)
+        return image
 
     def get_processed_image(self, image: Image.Image, text: str) -> Image.Image:
         commands = ImageCommandsParser(text).get_commands()
