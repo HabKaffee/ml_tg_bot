@@ -11,6 +11,7 @@ from .mapping import ImageCommandsParser
 class ImageProcessor(ABC):
     @abstractmethod
     def get_processed_image(self, image: Image.Image, text: str) -> Image.Image: ...
+
     @abstractmethod
     def _apply_commands(self, image, commands: List[Tuple[str, List[str], Callable]]) -> Image.Image: ...
 
