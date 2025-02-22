@@ -4,6 +4,7 @@ from typing import Callable, List, Tuple
 import cv2
 import numpy as np
 from PIL import Image
+from utils import cv2_to_pil, pil_to_cv2
 
 from .mapping import ImageCommandsParser
 
@@ -13,11 +14,11 @@ class ImageProcessor(ABC):
     def get_processed_image(self, image: Image.Image, text: str) -> Image.Image: ...
 
     @abstractmethod
-    def _apply_commands(self, image, commands: List[Tuple[str, List[str], Callable]]) -> Image.Image: ...
+    def _apply_commands(self, image: np.ndarray, commands: List[Tuple[str, List[str], Callable]]) -> np.ndarray: ...
 
 
 class ImageProcessorByText(ImageProcessor):
-    def _apply_commands(self, image, commands: List[Tuple[str, List[str], Callable]]) -> Image.Image:
+    def _apply_commands(self, image: np.ndarray, commands: List[Tuple[str, List[str], Callable]]) -> np.ndarray:
         for command, params, func in commands:
             match command:
                 case "resize":
@@ -58,4 +59,7 @@ class ImageProcessorByText(ImageProcessor):
 
     def get_processed_image(self, image: Image.Image, text: str) -> Image.Image:
         commands = ImageCommandsParser(text).get_commands()
-        return self._apply_commands(image, commands)
+
+        inner_image_representation = pil_to_cv2(image)
+        inner_image_representation = self._apply_commands(inner_image_representation, commands)
+        return cv2_to_pil(inner_image_representation)
