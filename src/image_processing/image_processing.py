@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Callable, List, Tuple
 
-import numpy as np
 import cv2
+import numpy as np
 from PIL import Image
 
 from .mapping import ImageCommandsParser
