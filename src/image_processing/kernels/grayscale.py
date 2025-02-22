@@ -6,20 +6,20 @@ import numpy as np
 from src.image_processing.kernels.kernel import Kernel
 
 
-class ResizeImage(Kernel):
+class GrayscaleImage(Kernel):
     """
-    Resize image
+    Convert image to grayscale
     """
 
     @staticmethod
     def process(image: np.ndarray, params: List[str]) -> np.ndarray:
         """
-        Resize image
+        Convert image to grayscale
         Args:
             image: np.ndarray image
             params: list of parameters
         Returns:
             image: np.ndarray image
         """
-        width, height = map(int, params)
-        return cv2.resize(image, (width, height))
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        return image

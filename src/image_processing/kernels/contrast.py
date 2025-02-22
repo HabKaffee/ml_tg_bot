@@ -6,20 +6,21 @@ import numpy as np
 from src.image_processing.kernels.kernel import Kernel
 
 
-class ResizeImage(Kernel):
+class ContrastImage(Kernel):
     """
-    Resize image
+    Change image contrast
     """
 
     @staticmethod
     def process(image: np.ndarray, params: List[str]) -> np.ndarray:
         """
-        Resize image
+        Change image contrast
         Args:
             image: np.ndarray image
             params: list of parameters
         Returns:
             image: np.ndarray image
         """
-        width, height = map(int, params)
-        return cv2.resize(image, (width, height))
+        alpha = 1.0 + int(params[0]) / 100.0
+        image = cv2.convertScaleAbs(image, alpha=alpha, beta=0)
+        return image

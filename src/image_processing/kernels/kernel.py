@@ -1,13 +1,16 @@
-from typing import List, Protocol
+from abc import ABC, abstractmethod
+from typing import List
 
 import numpy as np
 
 
-class Kernel(Protocol):
+class Kernel(ABC):
     """
     Kernel interface for image processing
     """
 
+    @staticmethod
+    @abstractmethod
     def process(image: np.ndarray, params: List[str]) -> np.ndarray:
         """
         Process the given image using the specified parameters.
@@ -19,4 +22,3 @@ class Kernel(Protocol):
         Returns:
             np.ndarray: The processed image, represented as a NumPy array.
         """
-        ...

@@ -6,20 +6,20 @@ import numpy as np
 from src.image_processing.kernels.kernel import Kernel
 
 
-class ResizeImage(Kernel):
+class InvertImage(Kernel):
     """
-    Resize image
+    Invert image colors
     """
 
     @staticmethod
     def process(image: np.ndarray, params: List[str]) -> np.ndarray:
         """
-        Resize image
+        Invert image colors
         Args:
             image: np.ndarray image
             params: list of parameters
         Returns:
             image: np.ndarray image
         """
-        width, height = map(int, params)
-        return cv2.resize(image, (width, height))
+        image = cv2.bitwise_not(image)
+        return image

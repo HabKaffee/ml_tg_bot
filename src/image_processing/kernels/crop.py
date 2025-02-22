@@ -6,15 +6,15 @@ import numpy as np
 from src.image_processing.kernels.kernel import Kernel
 
 
-class ResizeImage(Kernel):
+class CropImage(Kernel):
     """
-    Resize image
+    Crop image
     """
 
     @staticmethod
     def process(image: np.ndarray, params: List[str]) -> np.ndarray:
         """
-        Resize image
+        Crop image
         Args:
             image: np.ndarray image
             params: list of parameters
@@ -22,4 +22,6 @@ class ResizeImage(Kernel):
             image: np.ndarray image
         """
         width, height = map(int, params)
-        return cv2.resize(image, (width, height))
+        x, y = image.shape[1] // 2, image.shape[0] // 2
+        image = cv2.getRectSubPix(image, (width, height), (x, y))
+        return image
