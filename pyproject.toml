@@ -19,5 +19,5 @@ exclude = '''
 )/
 '''
 
-[tool.pylint]
+[tool.pylint.master]
 generated-members="cv2.*"
