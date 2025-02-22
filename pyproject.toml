@@ -18,6 +18,3 @@ exclude = '''
   | dist
 )/
 '''
-
-[tool.pylint.master]
-generated-members="cv2.*"
