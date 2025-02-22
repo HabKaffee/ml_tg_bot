@@ -1,14 +1,7 @@
 from enum import Enum
 
-import cv2
 
-
-class ImageProcessCommands(Enum):
-    PATTERN = "pattern"
-    COMMAND = "command"
-
-
-class Commands(Enum):
+class CommandType(Enum):
     RESIZE = "resize"
     ROTATE = "rotate"
     FLIP = "flip"
@@ -24,40 +17,18 @@ class Commands(Enum):
     GAMMA = "gamma"
 
 
-class CommandsPatterns:
-    def get_commands(self):
+class CommandTypePatterns:
+    def get_patterns(self):
         return {
-            Commands.RESIZE: {
-                ImageProcessCommands.PATTERN: r"изменить размер до (\d+)x(\d+)",
-            },
-            Commands.ROTATE: {
-                ImageProcessCommands.PATTERN: r"повернуть на (-?\d+) градусов",
-            },
-            Commands.FLIP: {
-                ImageProcessCommands.PATTERN: r"отразить (горизонтально|вертикально)",
-            },
-            Commands.BRIGHTNESS: {
-                ImageProcessCommands.PATTERN: r"изменить яркость на (-?\d+)",
-            },
-            Commands.CONTRAST: {
-                ImageProcessCommands.PATTERN: r"изменить контрастность на (-?\d+)",
-            },
-            Commands.CROP: {
-                ImageProcessCommands.PATTERN: r"обрезать до (\d+)x(\d+)",
-            },
-            Commands.GRAYSCALE: {
-                ImageProcessCommands.PATTERN: r"преобразовать в черно-белый",
-            },
-            Commands.INVERT: {
-                ImageProcessCommands.PATTERN: r"инвертировать цвета|инвертировать",
-            },
-            Commands.BLUR: {
-                ImageProcessCommands.PATTERN: r"размытие с радиусом (\d+)",
-            },
-            Commands.SHARPEN: {
-                ImageProcessCommands.PATTERN: r"повысить резкость на (-?\d+)",
-            },
-            Commands.GAMMA: {
-                ImageProcessCommands.PATTERN: r"изменить гамму на (-?\d+)",
-            },
+            CommandType.RESIZE: r"изменить размер до (\d+)x(\d+)",
+            CommandType.ROTATE: r"повернуть на (-?\d+) градусов",
+            CommandType.FLIP: r"отразить (горизонтально|вертикально)",
+            CommandType.BRIGHTNESS: r"изменить яркость на (-?\d+)",
+            CommandType.CONTRAST: r"изменить контрастность на (-?\d+)",
+            CommandType.CROP: r"обрезать до (\d+)x(\d+)",
+            CommandType.GRAYSCALE: r"преобразовать в черно-белый",
+            CommandType.INVERT: r"инвертировать цвета|инвертировать",
+            CommandType.BLUR: r"размытие с радиусом (\d+)",
+            CommandType.SHARPEN: r"повысить резкость на (-?\d+)",
+            CommandType.GAMMA: r"изменить гамму на (-?\d+)",
         }

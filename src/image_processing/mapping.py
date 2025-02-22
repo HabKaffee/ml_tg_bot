@@ -2,12 +2,12 @@ from dataclasses import dataclass
 import re
 from typing import List
 
-from src.image_processing.patterns import Commands, CommandsPatterns, ImageProcessCommands
+from src.image_processing.patterns import CommandType, CommandTypePatterns
 
 
 @dataclass
 class Command:
-    def __init__(self, command_type: Commands, parameters: List[str]):
+    def __init__(self, command_type: CommandType, parameters: List[str]):
         self.command_type = command_type
         self.parameters = parameters
 
@@ -15,23 +15,22 @@ class Command:
 class ImageCommandsParser:
     def __init__(self, text: str):
         self.text = text.lower()
-        self.commands = self._parse_commands()
+        self._commands = self._parse_commands()
 
     def _parse_commands(self) -> List[Command]:
-        patterns = CommandsPatterns().get_commands()
+        patterns = CommandTypePatterns().get_patterns()
         commands = []
-        for command, data in patterns.items():
-            pattern = data[ImageProcessCommands.PATTERN]
+        for command_type, pattern in patterns.items():
             matches = re.findall(pattern, self.text)
 
             for match in matches:
                 if isinstance(match, tuple):
-                    command = Command(command, list(match))
+                    command_type = Command(command_type, list(match))
                 else:
-                    command = Command(command, [match])
+                    command_type = Command(command_type, [match])
 
-                commands.append(command)
+                commands.append(command_type)
         return commands
 
     def get_commands(self) -> List[Command]:
-        return self.commands
+        return self._commands

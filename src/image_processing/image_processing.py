@@ -1,14 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import Callable, List, Tuple
+from typing import Dict, List
 
 import numpy as np
 from PIL import Image
+from src.image_processing.kernels.kernel import Kernel
 from src.image_processing.kernels.resize import ResizeImage
 from src.image_processing.kernels.rotate import RotateImage
 from utils import cv2_to_pil, pil_to_cv2
 
 from src.image_processing.mapping import Command, ImageCommandsParser
-from src.image_processing.patterns import Commands
+from src.image_processing.patterns import CommandType
 
 
 class ImageProcessor(ABC):
@@ -16,20 +17,21 @@ class ImageProcessor(ABC):
     def get_processed_image(self, image: Image.Image, text: str) -> Image.Image: ...
 
     @abstractmethod
-    def _apply_commands(self, image: np.ndarray, commands: List[Tuple[str, List[str], Callable]]) -> np.ndarray: ...
+    def _apply_commands(self, image: np.ndarray, command_queue: List[Command]) -> np.ndarray: ...
 
 
-command_matching = {
-    Commands.RESIZE: ResizeImage,
-    Commands.ROTATE: RotateImage,
+Command_Matching_Map: Dict[CommandType, Kernel] = {
+    CommandType.RESIZE: ResizeImage,
+    CommandType.ROTATE: RotateImage,
 }
 
 
 class ImageProcessorByText(ImageProcessor):
-    def _apply_commands(self, image: np.ndarray, commands: List[Command]) -> np.ndarray:
-        for command in commands:
-            if command.command_type in command_matching:
-                image = command_matching[command.command_type].process(
+
+    def _apply_commands(self, image: np.ndarray, command_queue: List[Command]) -> np.ndarray:
+        for command in command_queue:
+            if command.command_type in Command_Matching_Map:
+                image = Command_Matching_Map[command.command_type].process(
                     image=image,
                     params=command.parameters
                 )
@@ -69,10 +71,12 @@ class ImageProcessorByText(ImageProcessor):
                 #     table = np.array([(i / 255.0) ** gamma * 255 for i in range(256)]).astype("uint8")
                 #     image = cv2.LUT(image, table)
 
+
     def get_processed_image(self, image: Image.Image, text: str) -> Image.Image:
         commands = ImageCommandsParser(text).get_commands()
 
         inner_image_representation = pil_to_cv2(image)
         inner_image_representation = self._apply_commands(inner_image_representation, commands)
+        inner_image_representation = cv2_to_pil(inner_image_representation)
 
-        return cv2_to_pil(inner_image_representation)
+        return inner_image_representation
