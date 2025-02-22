@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Callable
 
-import cv2
+from cv2 import cv2
 import numpy as np
 from PIL import Image
 

@@ -1,6 +1,5 @@
 from enum import Enum
-
-import cv2
+from cv2 import cv2
 
 
 class ImageProcessCommands(Enum):
