@@ -1,4 +1,5 @@
 from enum import Enum
+
 from cv2 import cv2
 
 

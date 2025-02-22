@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Callable
+from typing import Callable, List, Tuple
 
-from cv2 import cv2
 import numpy as np
+from cv2 import cv2
 from PIL import Image
 
 from .mapping import ImageCommandsParser
@@ -10,22 +10,13 @@ from .mapping import ImageCommandsParser
 
 class ImageProcessor(ABC):
     @abstractmethod
-    def get_processed_image(self,
-                            image: Image.Image,
-                            text: str
-    ) -> Image.Image: ...
+    def get_processed_image(self, image: Image.Image, text: str) -> Image.Image: ...
     @abstractmethod
-    def _apply_commands(self,
-                        image,
-                        commands: List[Tuple[str, List[str], Callable]]
-    ) -> Image.Image: ...
+    def _apply_commands(self, image, commands: List[Tuple[str, List[str], Callable]]) -> Image.Image: ...
 
 
 class ImageProcessorByText(ImageProcessor):
-    def _apply_commands(self,
-                        image,
-                        commands: List[Tuple[str, List[str], Callable]]
-    ) -> Image.Image:
+    def _apply_commands(self, image, commands: List[Tuple[str, List[str], Callable]]) -> Image.Image:
         for command, params, func in commands:
             match command:
                 case "resize":
@@ -60,8 +51,7 @@ class ImageProcessorByText(ImageProcessor):
                     image = func(image, cv2.COLOR_BGR2HSV)
                 case "gamma":
                     gamma = float(params[0])
-                    table = np.array([(i / 255.0) ** gamma * 255 \
-                                      for i in range(256)]).astype("uint8")
+                    table = np.array([(i / 255.0) ** gamma * 255 for i in range(256)]).astype("uint8")
                     image = func(image, table)
 
     def get_processed_image(self, image: Image.Image, text: str) -> Image.Image:
