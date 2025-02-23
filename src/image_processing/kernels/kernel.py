@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 import numpy as np
+
+from src.image_processing.command import CommandParameters
 
 
 class Kernel(ABC):
@@ -11,13 +12,13 @@ class Kernel(ABC):
 
     @staticmethod
     @abstractmethod
-    def process(image: np.ndarray, params: List[str]) -> np.ndarray:
+    def process(image: np.ndarray, params: CommandParameters) -> np.ndarray:
         """
         Process the given image using the specified parameters.
 
         Args:
             image (np.ndarray): The image to be processed, represented as a NumPy array.
-            params (List[str]): A list of parameters required for processing the image.
+            params: CommandParameters
 
         Returns:
             np.ndarray: The processed image, represented as a NumPy array.

@@ -1,8 +1,7 @@
-from typing import List
-
 import cv2
 import numpy as np
 
+from src.image_processing.command import CommandParameters
 from src.image_processing.kernels.kernel import Kernel
 
 
@@ -12,12 +11,12 @@ class GrayscaleImage(Kernel):
     """
 
     @staticmethod
-    def process(image: np.ndarray, params: List[str]) -> np.ndarray:
+    def process(image: np.ndarray, params: CommandParameters) -> np.ndarray:
         """
         Convert image to grayscale
         Args:
             image: np.ndarray image
-            params: list of parameters
+            params: CommandParameters
         Returns:
             image: np.ndarray image
         """

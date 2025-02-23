@@ -1,7 +1,18 @@
 from dataclasses import dataclass
-from typing import List
 
 from src.image_processing.kernels.kernel_types import KernelTypes
+
+
+@dataclass
+class CommandParameters:
+    """
+    Dataclass for collecting command parameters
+    """
+
+    step: str = "0"
+    height: str = "0"
+    width: str = "0"
+    angle: str = "0"
 
 
 @dataclass
@@ -11,4 +22,4 @@ class Command:
     """
 
     kernel_type: KernelTypes
-    parameters: List[str]
+    parameters: CommandParameters
