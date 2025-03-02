@@ -23,6 +23,7 @@ def get_random_cat_image() -> Image.Image:
 
 class Arguments(Tap):
     command_parser: CommandParserTypes = CommandParserTypes.AI
+    input_text: str = "повернуть на 90 градусов и сделать черно белым"
 
 
 def main() -> None:
@@ -34,9 +35,7 @@ def main() -> None:
     random_cat_image = get_random_cat_image()
     random_cat_image.show()
 
-    input_text = "повернуть на 90 градусов и сделать черно белым"
-
-    commands = text_processor.parse_text(input_text)
+    commands = text_processor.parse_text(args.input_text)
 
     processed_image = image_processor.get_processed_image(image=random_cat_image, command_queue=commands)
 
