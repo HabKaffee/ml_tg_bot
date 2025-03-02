@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 from src.image_processing.kernels.kernel_types import KernelTypes
 
@@ -13,6 +14,10 @@ class CommandParameters:
     height: str = "0"
     width: str = "0"
     angle: str = "0"
+
+    @classmethod
+    def get_keys(cls) -> List[str]:
+        return [key for key in cls.__annotations__.keys()]
 
 
 @dataclass

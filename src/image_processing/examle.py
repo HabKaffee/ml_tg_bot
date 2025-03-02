@@ -28,10 +28,10 @@ class Arguments(Tap):
 def main() -> None:
     args = Arguments(underscores_to_dashes=True).parse_args()
 
-    random_cat_image = get_random_cat_image()
     image_processor = ImageProcessor()
     text_processor = get_command_parser(args.command_parser)
 
+    random_cat_image = get_random_cat_image()
     random_cat_image.show()
 
     input_text = "повернуть на 90 градусов"
