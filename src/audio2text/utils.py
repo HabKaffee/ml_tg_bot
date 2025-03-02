@@ -12,6 +12,7 @@ from scipy.io.wavfile import write  # pylint: disable=import-error
 
 
 def load_data_golos(path_to_audio):
+    """Loads test dataset from GOLOS and saves audio samples to files."""
     ds = load_dataset("bond005/sberdevices_golos_10h_crowd")
     data_ = ds["test"]
     real_transcriptions = []
@@ -24,6 +25,7 @@ def load_data_golos(path_to_audio):
 
 
 def gen_transcriptions_golos(model, processor, num_samples=10):
+    """Generates transcriptions for stored audio files using a speech model."""
     transcriptions = []
     audio_paths = [f"./audio_files/output_{i}.wav" for i in range(num_samples)]
     for audio_path in audio_paths:
@@ -41,6 +43,7 @@ def gen_transcriptions_golos(model, processor, num_samples=10):
 
 
 def calc_test_metrics(real_transcriptions, generated_transcriptions):
+    """Calculates Word Error Rate (WER) and Character Error Rate (CER)."""
     nan_indices = [
         i for i, val in enumerate(real_transcriptions) if val is None or (isinstance(val, float) and np.isnan(val))
     ]
@@ -52,6 +55,7 @@ def calc_test_metrics(real_transcriptions, generated_transcriptions):
 
 
 def gen_transcription(model, processor, path_to_file):
+    """Generates a transcription for a single audio file."""
     if os.path.exists(path_to_file):
         speech_array, _ = librosa.load(path_to_file, sr=16_000)
         inputs = processor(speech_array, sampling_rate=16_000, return_tensors="pt", padding=True)
@@ -64,6 +68,7 @@ def gen_transcription(model, processor, path_to_file):
 
 
 def ogg_to_wav(path_to_file, path_to_new_file):
+    """Converts an OGG audio file to WAV format."""
     timestr = time.strftime("%Y%m%d-%H%M%S")
     data, samplerate = sf.read(path_to_file)
-    sf.write(path_to_new_file + f"/{timestr}wav_transformed.wav", data, samplerate)
+    sf.write(path_to_new_file + f"/{timestr}_wav_transformed.wav", data, samplerate)
