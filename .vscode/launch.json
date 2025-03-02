@@ -12,6 +12,9 @@
             "program": "src/image_processing/examle.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
+            "args": [
+                "--command-parser", "ai"
+            ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             }

@@ -2,8 +2,9 @@ from io import BytesIO
 
 import requests
 from PIL import Image
+from tap import Tap
 
-from src.image_processing.command_parser import PatternCommandParser
+from src.image_processing.command_parser.command_parser_creator import CommandParserTypes, get_command_parser
 from src.image_processing.image_processor import ImageProcessor
 
 
@@ -20,10 +21,16 @@ def get_random_cat_image() -> Image.Image:
     return image
 
 
+class Arguments(Tap):
+    command_parser: CommandParserTypes = CommandParserTypes.AI
+
+
 def main() -> None:
+    args = Arguments(underscores_to_dashes=True).parse_args()
+
     random_cat_image = get_random_cat_image()
     image_processor = ImageProcessor()
-    text_processor = PatternCommandParser()
+    text_processor = get_command_parser(args.command_parser)
 
     random_cat_image.show()
 
