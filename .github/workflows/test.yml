@@ -21,22 +21,27 @@ jobs:
         pip install -r requirements.txt
         pip install -r config/requirements_qa.txt
 
+    - name: Check python init files
+      run: |
+        source config/bootstrap.sh
+        python config/py_init_checker.py --directory .
+
     - name: Analyzing the code with pylint
       run: |
         source config/bootstrap.sh
-        pylint src/ --rcfile config/.pylintrc
+        pylint . --rcfile config/.pylintrc
 
     - name: Analyzing the code with isort
       run: |
         source config/bootstrap.sh
-        isort src/ -c
+        isort . -c
 
     - name: Analyzing the code with black
       run: |
         source config/bootstrap.sh
-        black src/ --check
+        black . --check
 
     - name: Analyzing the code with mypy
       run: |
         source config/bootstrap.sh
-        mypy src/
+        mypy .
