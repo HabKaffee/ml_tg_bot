@@ -40,3 +40,9 @@ jobs:
       run: |
         source config/bootstrap.sh
         mypy src/
+
+    - name: Analyzing the json files
+      run: |
+        apt-get install jq -y
+        source config/bootstrap.sh
+        bash config/check_json.sh

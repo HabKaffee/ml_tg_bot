@@ -28,8 +28,7 @@
             },
             {
                 "action": "grayscale",
-                "parameters": {
-                }
+                "parameters": {}
             }
         ]
     }
