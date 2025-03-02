@@ -1,5 +1,6 @@
 import os
 import time
+from typing import cast # pylint: disable=import-error
 
 import librosa  # pylint: disable=import-error
 import numpy as np
@@ -63,7 +64,8 @@ def gen_transcription(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, path_
         with torch.no_grad():
             logits = model(inputs.input_values, attention_mask=inputs.attention_mask).logits
         predicted_ids = torch.argmax(logits, dim=-1)
-        transcription = processor.batch_decode(predicted_ids)[0]
+        decoded = processor.batch_decode(predicted_ids)
+        transcription = cast(str, decoded[0]) if decoded else ""
         return transcription
     return "FileNotFoundError"
 
