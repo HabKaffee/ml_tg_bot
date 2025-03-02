@@ -11,10 +11,7 @@ class CommandParserTypes(Enum):
 
 
 def get_command_parser(command_parser: CommandParserTypes) -> CommandParser:
-    parser_map = {
-        CommandParserTypes.PATTERN: PatternCommandParser,
-        CommandParserTypes.AI: AICommandParser
-    }
+    parser_map = {CommandParserTypes.PATTERN: PatternCommandParser, CommandParserTypes.AI: AICommandParser}
     if command_parser not in parser_map:
         raise ValueError(f"Unsupported command parser: {command_parser}")
     return parser_map[command_parser]()
