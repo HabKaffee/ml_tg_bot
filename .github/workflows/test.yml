@@ -22,18 +22,18 @@ jobs:
         pip install -r config/requirements_qa.txt
 
     - name: Analyzing the code with pylint
-      run:
-        - bash config/run_lint.sh
+      run: |
+          bash config/run_lint.sh
 
     - name: Analyzing the code with isort
-      run:
-        - bash config/run_isort.sh
+      run: |
+          bash config/run_isort.sh
 
     - name: Analyzing the code with black
-      run:
-        - bash config/run_black.sh
+      run: |
+          bash config/run_black.sh
 
 
     - name: Analyzing the code with mypy
-      run:
-        - bash config/run_mypy.sh
+      run: |
+          bash config/run_mypy.sh
