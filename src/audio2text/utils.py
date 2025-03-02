@@ -52,9 +52,7 @@ def calc_test_metrics(real_transcriptions, generated_transcriptions):
 
 
 def generate_transcription(model, processor, path_to_file):
-    if not os.path.exists(path_to_file):
-        raise FileNotFoundError(f"File not found: {path_to_file}")
-    else:
+    if os.path.exists(path_to_file):
         speech_array, _ = librosa.load(path_to_file, sr=16_000)
         inputs = processor(speech_array, sampling_rate=16_000, return_tensors="pt", padding=True)
         with torch.no_grad():
@@ -62,6 +60,7 @@ def generate_transcription(model, processor, path_to_file):
         predicted_ids = torch.argmax(logits, dim=-1)
         transcription = processor.batch_decode(predicted_ids)[0]
         return transcription
+    return None
 
 
 def ogg_to_wav(path_to_file, path_to_new_file):
