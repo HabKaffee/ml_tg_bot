@@ -4,12 +4,15 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 import torch
-from accelerate.test_utils.testing import get_backend
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import pipeline
 
 from src.image_processing.command import Command, CommandParameters
 from src.image_processing.command_parser.command_parser import CommandParser
 from src.image_processing.kernels.kernel_types import KernelTypes
+
+
+def process_json_text(input_text: str) -> str:
+    return input_text.replace("\n", "").replace("'", '"')
 
 
 class AIPrompter:
@@ -40,23 +43,18 @@ class AIPrompter:
         Тебе дается текст, описывающий, как нужно изменить изображение.
 
         Формат выходных данных:
-        Ты должен вернуть JSON-объект с инструкциями.
-        JSON должен содержать два ключа:
+        Ты должен вернуть ровно один JSON-объект в виде списка с инструкциями.
+        Каждая инструкция должна содержать два ключа:
         1. `"action"` – название действия из набора {kernel_keys}.
         2. `"parameters"` – словарь с параметрами, необходимыми для выполнения действия из набора {command_keys}
         """
         return prompt
 
-    def prepare_prompt(self, input_text: str, expected_json_key: str) -> str:
+    def prepare_prompt(self) -> str:
         prompt = f"""
         {self._basic_prompt}
         ---
         {self._few_shot_prompt}
-        ---
-        Входной текст:
-        "{input_text}"
-
-        {expected_json_key}
         """
         return prompt
 
@@ -68,31 +66,32 @@ class AICommandParser(CommandParser):
 
     def __init__(self) -> None:
         super().__init__()
-        self._model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-
-        self._device, _, _ = get_backend()
-        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-        self._tokenizer.pad_token = self._tokenizer.eos_token
-        self._model = AutoModelForCausalLM.from_pretrained(
-            self._model_name, torch_dtype=torch.float16, device_map="auto"
-        ).to(self._device)
-
         self._prompter = AIPrompter()
         self._json_pattern = re.compile(r".*(?P<json>\[.*\]).*")
 
+        self._model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+        self._pipeline = pipeline(
+            "text-generation", model=self._model_name, torch_dtype=torch.float16, device_map="auto"
+        )
+
     def _get_llm_output(self, input_text: str) -> List[Dict[str, Union[str, Dict]]]:
-        expected_json_key = "##########"
-        prompt = self._prompter.prepare_prompt(input_text, expected_json_key)
+        prompt = self._prompter.prepare_prompt()
+        messages = [
+            {
+                "role": "system",
+                "content": prompt,
+            },
+            {"role": "user", "content": input_text},
+        ]
 
-        inputs = self._tokenizer(prompt, return_tensors="pt").to(self._device)
-        output = self._model.generate(**inputs)
-        parsed_text = self._tokenizer.decode(output[0], skip_special_tokens=True)
+        prompt = self._pipeline.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        outputs = self._pipeline(prompt)
 
-        clipped_parsed_text = parsed_text.split(expected_json_key)[1].strip().replace("\n", "").replace(" ", "")
+        processed_text = process_json_text(outputs[0]["generated_text"])
+        processed_text_match = self._json_pattern.match(processed_text)
 
-        parsed_text_match = self._json_pattern.match(clipped_parsed_text)
-        if parsed_text_match:
-            return list(json.loads(parsed_text_match.group("json")))
+        if processed_text_match:
+            return list(json.loads(processed_text_match.group("json")))
         raise ValueError(f"Failed to parse text: {input_text}")
 
     def parse_text(self, text: str) -> List[Command]:
