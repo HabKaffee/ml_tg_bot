@@ -23,7 +23,7 @@ def load_data_golos(path_to_audio):
     return real_transcriptions
 
 
-def generate_transcriptions_golos(model, processor, num_samples=10):
+def gen_transcriptions_golos(model, processor, num_samples=10):
     transcriptions = []
     audio_paths = [f"./audio_files/output_{i}.wav" for i in range(num_samples)]
     for audio_path in audio_paths:
@@ -51,7 +51,7 @@ def calc_test_metrics(real_transcriptions, generated_transcriptions):
     print("CER:", cer(real_transcriptions[:len_], generated_transcriptions[:len_]))
 
 
-def generate_transcription(model, processor, path_to_file):
+def gen_transcription(model, processor, path_to_file):
     if os.path.exists(path_to_file):
         speech_array, _ = librosa.load(path_to_file, sr=16_000)
         inputs = processor(speech_array, sampling_rate=16_000, return_tensors="pt", padding=True)
