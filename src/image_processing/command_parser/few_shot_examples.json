@@ -1,0 +1,35 @@
+[
+    {
+        "input": "Повернуть на 90 градусов и обрезать до 100 на 150",
+        "output": [
+            {
+                "action": "rotate",
+                "parameters": {
+                    "angle": 90
+                }
+            },
+            {
+                "action": "crop",
+                "parameters": {
+                    "height": 100,
+                    "width": 150
+                }
+            }
+        ]
+    },
+    {
+        "input": "Увеличить контрастность на 10 и сделать черно-белым",
+        "output": [
+            {
+                "action": "contrast",
+                "parameters": {
+                    "step": 10
+                }
+            },
+            {
+                "action": "grayscale",
+                "parameters": {}
+            }
+        ]
+    }
+]

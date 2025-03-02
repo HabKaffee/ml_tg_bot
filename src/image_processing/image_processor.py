@@ -13,7 +13,7 @@ class ImageProcessor:
     ImageProcessor class.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._kernel_map = get_kernel_map()
 
     def get_processed_image(self, image: Image.Image, command_queue: List[Command]) -> Image.Image:
