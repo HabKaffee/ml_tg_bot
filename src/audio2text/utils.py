@@ -1,14 +1,14 @@
 import os
 import time
 
-import librosa
+import librosa # pylint: disable=import-error
 import numpy as np
-import soundfile as sf
+import soundfile as sf # pylint: disable=import-error
 import torch
-import tqdm
-from datasets import load_dataset
-from jiwer import cer, wer
-from scipy.io.wavfile import write
+import tqdm # pylint: disable=import-error
+from datasets import load_dataset # pylint: disable=import-error
+from jiwer import cer, wer # pylint: disable=import-error
+from scipy.io.wavfile import write # pylint: disable=import-error
 
 
 def load_data_golos(path_to_audio):
