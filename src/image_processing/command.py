@@ -17,7 +17,7 @@ class CommandParameters:
 
     @classmethod
     def get_keys(cls) -> List[str]:
-        return [key for key in cls.__annotations__.keys()]
+        return list(cls.__annotations__.keys())
 
 
 @dataclass

@@ -18,3 +18,17 @@ exclude = '''
   | dist
 )/
 '''
+
+[tool.mypy]
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+# Ignore specific packages
+[[tool.mypy.overrides]]
+module = [
+    "transformers.*",
+    "accelerate.*"
+]
+ignore_missing_imports = true
+follow_imports = "skip"

@@ -1,6 +1,7 @@
 import json
 import re
-from typing import List
+from pathlib import Path
+from typing import Dict, List, Union
 
 import torch
 from accelerate.test_utils.testing import get_backend
@@ -12,26 +13,20 @@ from src.image_processing.kernels.kernel_types import KernelTypes
 
 
 class AIPrompter:
-    def __init__(self):
+    def __init__(self) -> None:
         self._basic_prompt = self._prepare_basic_prompt()
+        self._path_to_few_shot_examples = Path("src/image_processing/command_parser/few_shot_examples.json")
         self._few_shot_prompt = self._prepare_few_shot_prompt()
 
     def _prepare_few_shot_prompt(self) -> str:
-        few_shot_examples = [
-            (
-                "Повернуть на 90 градусов и обрезать до 100 на 150",
-                '[{"action":"rotate","parameters":{"angle":90}},{"action":"crop","parameters":{"height":100,"width":150}}]',
-            ),
-            (
-                "Увеличить контрастность на 10 и сделать черно-белым",
-                '[{"action":"contrast","parameters":{"step":10}},{"action":"grayscale","parameters":{None:None}}]',
-            ),
-        ]
+        with self._path_to_few_shot_examples.open(mode="r", encoding="utf-8") as file:
+            few_shot_examples = json.load(file)
 
         few_shot_prompt = "Examples:\n"
         for example in few_shot_examples:
-            input_text, expected_json = example
-            few_shot_prompt += f'Input: "{input_text}". Result: "{expected_json}".\n'
+            input_text = example["input"]
+            expected_json = example["output"]
+            few_shot_prompt += f"Input: {input_text}. Result: {expected_json}.\n"
         return few_shot_prompt
 
     def _prepare_basic_prompt(self) -> str:
@@ -71,7 +66,7 @@ class AICommandParser(CommandParser):
     Command parser based on LLM
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
@@ -85,7 +80,7 @@ class AICommandParser(CommandParser):
         self._prompter = AIPrompter()
         self._json_pattern = re.compile(r".*(?P<json>\[.*\]).*")
 
-    def _get_llm_output(self, input_text: str) -> str:
+    def _get_llm_output(self, input_text: str) -> List[Dict[str, Union[str, Dict]]]:
         expected_json_key = "##########"
         prompt = self._prompter.prepare_prompt(input_text, expected_json_key)
 
@@ -97,21 +92,20 @@ class AICommandParser(CommandParser):
 
         parsed_text_match = self._json_pattern.match(clipped_parsed_text)
         if parsed_text_match:
-            return json.loads(parsed_text_match.group("json"))
+            return list(json.loads(parsed_text_match.group("json")))
         raise ValueError(f"Failed to parse text: {input_text}")
 
     def parse_text(self, text: str) -> List[Command]:
-
         json_command = self._get_llm_output(text)
 
         commands = []
         for command in json_command:
-            action = command["action"]
+            kernel_type = KernelTypes(command["action"])
+
             parameters = command["parameters"]
+            if not isinstance(parameters, dict):
+                raise ValueError(f"Failed to parse parameters: {parameters}")
 
-            kernel_type = KernelTypes(action)
-            parameters = CommandParameters(**parameters)
-
-            commands.append(Command(kernel_type, parameters))
-
+            command_parameters = CommandParameters(**parameters)
+            commands.append(Command(kernel_type, command_parameters))
         return commands

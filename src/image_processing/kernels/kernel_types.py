@@ -16,5 +16,6 @@ class KernelTypes(Enum):
     ROTATE = "rotate"
     SHARPEN = "sharpen"
 
-    def get_keys() -> List[str]:
-        return [key.value for key in KernelTypes]
+    @classmethod
+    def get_keys(cls) -> List[str]:
+        return [key.value for key in cls]

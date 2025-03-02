@@ -34,7 +34,7 @@ def main() -> None:
     random_cat_image = get_random_cat_image()
     random_cat_image.show()
 
-    input_text = "повернуть на 90 градусов"
+    input_text = "повернуть на 90 градусов и сделать черно белым"
 
     commands = text_processor.parse_text(input_text)
 

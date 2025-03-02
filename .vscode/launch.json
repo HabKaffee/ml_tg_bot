@@ -16,7 +16,8 @@
                 "--command-parser", "ai"
             ],
             "env": {
-                "PYTHONPATH": "${workspaceFolder}"
+                "PYTHONPATH": "${workspaceFolder}",
+                "TOKENIZERS_PARALLELISM": "false"
             }
         },
     ]
