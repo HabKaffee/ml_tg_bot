@@ -55,7 +55,7 @@ def calc_test_metrics(real_transcriptions: list[str], generated_transcriptions: 
     print("CER:", cer(real_transcriptions[:len_], generated_transcriptions[:len_]))
 
 
-def gen_transcription(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, path_to_file: str) -> str | None:
+def gen_transcription(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, path_to_file: str) -> str:
     """Generates a transcription for a single audio file."""
     if os.path.exists(path_to_file):
         speech_array, _ = librosa.load(path_to_file, sr=16_000)
@@ -65,7 +65,7 @@ def gen_transcription(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, path_
         predicted_ids = torch.argmax(logits, dim=-1)
         transcription = processor.batch_decode(predicted_ids)[0]
         return transcription
-    return None
+    return "FileNotFoundError"
 
 
 def ogg_to_wav(path_to_file: str, path_to_new_file: str) -> None:
