@@ -1,11 +1,13 @@
 import time
-
+import os
 import numpy as np
 import soundfile as sf
 import tqdm
 from datasets import load_dataset
 from jiwer import cer, wer
 from scipy.io.wavfile import write
+import librosa
+import torch
 
 
 def load_data_golos(path_to_audio):
@@ -20,11 +22,21 @@ def load_data_golos(path_to_audio):
     return real_transcriptions
 
 
-def generate_transcriptions_golos(model, num_samples=100):
+def generate_transcriptions_golos(model, processor, num_samples=10):
+    transcriptions = []
     audio_paths = [f"./audio_files/output_{i}.wav" for i in range(num_samples)]
-    transcriptions = model.transcribe(audio_paths)
-    generated_transcriptions = [tr["transcription"] for tr in transcriptions]
-    return generated_transcriptions
+    for audio_path in audio_paths:
+        if os.path.exists(audio_path):
+            speech_array, sampling_rate = librosa.load(audio_path, sr=16_000)
+            inputs = processor(speech_array, sampling_rate=16_000, return_tensors="pt", padding=True)
+            with torch.no_grad():
+                logits = model(inputs.input_values, attention_mask=inputs.attention_mask).logits
+            predicted_ids = torch.argmax(logits, dim=-1)
+            transcription = processor.batch_decode(predicted_ids)[0]
+            transcriptions.append(transcription)
+    # transcriptions = model(audio_paths)
+    # generated_transcriptions = [tr["transcription"] for tr in transcriptions]
+    return transcriptions
 
 
 def calc_test_metrics(real_transcriptions, generated_transcriptions):
@@ -38,10 +50,17 @@ def calc_test_metrics(real_transcriptions, generated_transcriptions):
     print("CER:", cer(real_transcriptions[:len_], generated_transcriptions[:len_]))
 
 
-def generate_transcription(model, path_to_file):
-    transcriptions = model.transcribe([path_to_file])
-    generated_transcriptions = [tr["transcription"] for tr in transcriptions]
-    return generated_transcriptions
+def generate_transcription(model, processor, path_to_file):
+    if os.path.exists(path_to_file):
+        speech_array, sampling_rate = librosa.load(path_to_file, sr=16_000)
+        inputs = processor(speech_array, sampling_rate=16_000, return_tensors="pt", padding=True)
+        with torch.no_grad():
+            logits = model(inputs.input_values, attention_mask=inputs.attention_mask).logits
+        predicted_ids = torch.argmax(logits, dim=-1)
+        transcription = processor.batch_decode(predicted_ids)[0]
+        return transcription
+    else:
+        raise FileNotFoundError(f"File not found: {path_to_file}")
 
 
 def ogg_to_wav(path_to_file, path_to_new_file):
