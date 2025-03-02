@@ -28,7 +28,13 @@ disallow_untyped_defs = true
 [[tool.mypy.overrides]]
 module = [
     "transformers.*",
-    "accelerate.*"
+    "accelerate.*",
+    "librosa.*",
+    "soundfile.*",
+    "datasets.*",
+    "jiwer.*",
+    "scipy.*",
+    "typing.*"
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
