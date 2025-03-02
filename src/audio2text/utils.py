@@ -11,7 +11,7 @@ from jiwer import cer, wer  # pylint: disable=import-error
 from scipy.io.wavfile import write  # pylint: disable=import-error
 
 
-def load_data_golos(path_to_audio):
+def load_data_golos(path_to_audio: str) -> list[str]:
     """Loads test dataset from GOLOS and saves audio samples to files."""
     ds = load_dataset("bond005/sberdevices_golos_10h_crowd")
     data_ = ds["test"]
@@ -24,7 +24,7 @@ def load_data_golos(path_to_audio):
     return real_transcriptions
 
 
-def gen_transcriptions_golos(model, processor, num_samples=10):
+def gen_transcriptions_golos(model, processor, num_samples: int = 10) -> list[str]:
     """Generates transcriptions for stored audio files using a speech model."""
     transcriptions = []
     audio_paths = [f"./audio_files/output_{i}.wav" for i in range(num_samples)]
@@ -42,7 +42,7 @@ def gen_transcriptions_golos(model, processor, num_samples=10):
     return transcriptions
 
 
-def calc_test_metrics(real_transcriptions, generated_transcriptions):
+def calc_test_metrics(real_transcriptions: list[str], generated_transcriptions: list[str]) -> None:
     """Calculates Word Error Rate (WER) and Character Error Rate (CER)."""
     nan_indices = [
         i for i, val in enumerate(real_transcriptions) if val is None or (isinstance(val, float) and np.isnan(val))
@@ -54,7 +54,7 @@ def calc_test_metrics(real_transcriptions, generated_transcriptions):
     print("CER:", cer(real_transcriptions[:len_], generated_transcriptions[:len_]))
 
 
-def gen_transcription(model, processor, path_to_file):
+def gen_transcription(model, processor, path_to_file: str) -> str | None:
     """Generates a transcription for a single audio file."""
     if os.path.exists(path_to_file):
         speech_array, _ = librosa.load(path_to_file, sr=16_000)
@@ -67,7 +67,7 @@ def gen_transcription(model, processor, path_to_file):
     return None
 
 
-def ogg_to_wav(path_to_file, path_to_new_file):
+def ogg_to_wav(path_to_file: str, path_to_new_file: str) -> None:
     """Converts an OGG audio file to WAV format."""
     timestr = time.strftime("%Y%m%d-%H%M%S")
     data, samplerate = sf.read(path_to_file)
