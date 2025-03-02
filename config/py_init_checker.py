@@ -19,7 +19,7 @@ def check_init_files(directory: str) -> None:
         raise ValueError(
             f'The following directories do not contain "__init__.py" file. Please add them. {problem_directories}'
         )
-    print(f"Everything is ok in {directory}")
+    print(f"Directory {directory} has all the necessary __init__.py files.")
 
 
 if __name__ == "__main__":
