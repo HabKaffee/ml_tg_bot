@@ -9,6 +9,7 @@ import tqdm  # pylint: disable=import-error
 from datasets import load_dataset  # pylint: disable=import-error
 from jiwer import cer, wer  # pylint: disable=import-error
 from scipy.io.wavfile import write  # pylint: disable=import-error
+from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
 
 
 def load_data_golos(path_to_audio: str) -> list[str]:
@@ -24,7 +25,7 @@ def load_data_golos(path_to_audio: str) -> list[str]:
     return real_transcriptions
 
 
-def gen_transcriptions_golos(model, processor, num_samples: int = 10) -> list[str]:
+def gen_transcriptions_golos(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, num_samples: int = 10) -> list[str]:
     """Generates transcriptions for stored audio files using a speech model."""
     transcriptions = []
     audio_paths = [f"./audio_files/output_{i}.wav" for i in range(num_samples)]
@@ -54,7 +55,7 @@ def calc_test_metrics(real_transcriptions: list[str], generated_transcriptions: 
     print("CER:", cer(real_transcriptions[:len_], generated_transcriptions[:len_]))
 
 
-def gen_transcription(model, processor, path_to_file: str) -> str | None:
+def gen_transcription(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, path_to_file: str) -> str | None:
     """Generates a transcription for a single audio file."""
     if os.path.exists(path_to_file):
         speech_array, _ = librosa.load(path_to_file, sr=16_000)

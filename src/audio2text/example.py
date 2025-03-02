@@ -1,5 +1,6 @@
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
-from src.audio2text.utils import load_data_golos, gen_transcriptions_golos, calc_test_metrics, gen_transcription
+
+from src.audio2text.utils import calc_test_metrics, gen_transcription, gen_transcriptions_golos, load_data_golos
 
 processor = Wav2Vec2Processor.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-russian")
 model = Wav2Vec2ForCTC.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-russian")
