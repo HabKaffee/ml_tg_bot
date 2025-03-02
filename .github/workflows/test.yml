@@ -23,20 +23,17 @@ jobs:
 
     - name: Analyzing the code with pylint
       run: |
-        source config/bootstrap.sh
-        pylint src/ --rcfile config/.pylintrc
+          bash config/run_lint.sh
 
     - name: Analyzing the code with isort
       run: |
-        source config/bootstrap.sh
-        isort src/ -c
+          bash config/run_isort.sh
 
     - name: Analyzing the code with black
       run: |
-        source config/bootstrap.sh
-        black src/ --check
+          bash config/run_black.sh
+
 
     - name: Analyzing the code with mypy
       run: |
-        source config/bootstrap.sh
-        mypy src/
+          bash config/run_mypy.sh
