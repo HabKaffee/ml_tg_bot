@@ -1,10 +1,12 @@
-from datasets import load_dataset
-from scipy.io.wavfile import write
-import tqdm
-import numpy as np
-from jiwer import wer, cer
-import soundfile as sf
 import time
+
+import numpy as np
+import soundfile as sf
+import tqdm
+from datasets import load_dataset
+from jiwer import cer, wer
+from scipy.io.wavfile import write
+
 
 def load_data_golos(path_to_audio):
     ds = load_dataset("bond005/sberdevices_golos_10h_crowd")
