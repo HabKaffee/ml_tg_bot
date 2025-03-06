@@ -1,16 +1,20 @@
 import os
+from typing import List
 
 from tap import Tap
 
 
 class ArgumentParser(Tap):
     directory: str
+    exclude: List[str] = ["venv"]
 
 
-def check_init_files(directory: str) -> None:
+def check_init_files(directory: str, exclude: List[str]) -> None:
     problem_directories = []
 
     for root, _, files in os.walk(directory):
+        if any(excluded_directory in root for excluded_directory in exclude):
+            continue
         if any(file.endswith(".py") for file in files):
             if "__init__.py" not in files:
                 problem_directories.append(root)
@@ -24,4 +28,4 @@ def check_init_files(directory: str) -> None:
 
 if __name__ == "__main__":
     args = ArgumentParser().parse_args()
-    check_init_files(args.directory)
+    check_init_files(args.directory, args.exclude)
