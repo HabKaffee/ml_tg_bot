@@ -76,8 +76,8 @@ def gen_transcription_whisper(
         input_features = processor(audio_input, return_tensors="pt").input_features
         with torch.no_grad():
             generated_ids = model.generate(input_features)
-        transcription = processor.decode(generated_ids[0], skip_special_tokens=True)
-        transcription = str(transcription) if transcription else ""
+        decoded = processor.batch_decode(generated_ids[0], skip_special_tokens=True)
+        transcription = cast(str, decoded) if decoded else ""
         return transcription
     raise FileNotFoundError(f"No file {path_to_file}")
 
