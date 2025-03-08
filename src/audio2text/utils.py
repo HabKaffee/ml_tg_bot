@@ -10,7 +10,7 @@ import tqdm
 from datasets import load_dataset
 from jiwer import cer, wer
 from scipy.io.wavfile import write
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
+from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor, WhisperForConditionalGeneration, WhisperProcessor
 
 
 def load_data_golos(path_to_audio: str) -> list[str]:
@@ -26,12 +26,17 @@ def load_data_golos(path_to_audio: str) -> list[str]:
     return real_transcriptions
 
 
-def gen_transcriptions_golos(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, num_samples: int = 10) -> list[str]:
+def gen_transcriptions_golos(
+    model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, num_samples: int = 10, whisper_flag: bool = False
+) -> list[str]:
     """Generates transcriptions for stored audio files using a speech model."""
     transcriptions = []
     audio_paths = [f"./audio_files/output_{i}.wav" for i in range(num_samples)]
     for audio_path in audio_paths:
-        transcription = gen_transcription(model, processor, audio_path)
+        if whisper_flag:
+            transcription = gen_transcription_whisper(model, processor, audio_path)
+        else:
+            transcription = gen_transcription(model, processor, audio_path)
         transcriptions.append(transcription)
     return transcriptions
 
@@ -58,6 +63,20 @@ def gen_transcription(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, path_
         predicted_ids = torch.argmax(logits, dim=-1)
         decoded = processor.batch_decode(predicted_ids)
         transcription = cast(str, decoded[0]) if decoded else ""
+        return transcription
+    raise FileNotFoundError(f"No file {path_to_file}")
+
+
+def gen_transcription_whisper(
+    model: WhisperForConditionalGeneration, processor: WhisperProcessor, path_to_file: str
+) -> str:
+    """Generates a transcription for a single audio file."""
+    if os.path.exists(path_to_file):
+        audio_input, _ = librosa.load(path_to_file, sr=16000)
+        input_features = processor(audio_input, return_tensors="pt").input_features
+        with torch.no_grad():
+            generated_ids = model.generate(input_features)
+            transcription = processor.decode(generated_ids[0], skip_special_tokens=True)
         return transcription
     raise FileNotFoundError(f"No file {path_to_file}")
 
