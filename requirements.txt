@@ -7,3 +7,9 @@ torch==2.6.0
 accelerate==1.4.0
 tqdm==4.67.1
 tqdm-stubs==0.2.1
+datasets==2.21.0
+jiwer==2.6.0
+tqdm==4.67.1
+typing==3.7.4.3
+soundfile==0.13.1
+scipy==1.15.2

@@ -1,15 +1,15 @@
 import os
 import time
-from typing import cast  # pylint: disable=import-error
+from typing import cast
 
 import librosa  # pylint: disable=import-error
 import numpy as np
-import soundfile as sf  # pylint: disable=import-error
+import soundfile as sf
 import torch
-import tqdm  # pylint: disable=import-error
-from datasets import load_dataset  # pylint: disable=import-error
-from jiwer import cer, wer  # pylint: disable=import-error
-from scipy.io.wavfile import write  # pylint: disable=import-error
+import tqdm
+from datasets import load_dataset
+from jiwer import cer, wer
+from scipy.io.wavfile import write
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
 
 
