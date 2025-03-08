@@ -24,4 +24,5 @@ generated_transcriptions = gen_transcriptions_golos(model_wh, processor_wh, num_
 calc_test_metrics(real_transcriptions, generated_transcriptions)
 
 generated_transcription = gen_transcription_whisper(model_wh, processor_wh, "./audio_files/output_321.wav")
+generated_transcription = gen_transcription(model, processor, "./audio_files/output_321.wav")
 print(generated_transcription)
