@@ -31,16 +31,8 @@ def gen_transcriptions_golos(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor
     transcriptions = []
     audio_paths = [f"./audio_files/output_{i}.wav" for i in range(num_samples)]
     for audio_path in audio_paths:
-        if os.path.exists(audio_path):
-            speech_array, _ = librosa.load(audio_path, sr=16_000)
-            inputs = processor(speech_array, sampling_rate=16_000, return_tensors="pt", padding=True)
-            with torch.no_grad():
-                logits = model(inputs.input_values, attention_mask=inputs.attention_mask).logits
-            predicted_ids = torch.argmax(logits, dim=-1)
-            transcription = processor.batch_decode(predicted_ids)[0]
-            transcriptions.append(transcription)
-    # transcriptions = model(audio_paths)
-    # generated_transcriptions = [tr["transcription"] for tr in transcriptions]
+        transcription = gen_transcription(model, processor, audio_path)
+        transcriptions.append(transcription)
     return transcriptions
 
 
@@ -67,7 +59,7 @@ def gen_transcription(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, path_
         decoded = processor.batch_decode(predicted_ids)
         transcription = cast(str, decoded[0]) if decoded else ""
         return transcription
-    return "FileNotFoundError"
+    raise FileNotFoundError(f"No file {path_to_file}")
 
 
 def ogg_to_wav(path_to_file: str, path_to_new_file: str) -> None:

@@ -33,8 +33,7 @@ module = [
     "soundfile.*",
     "datasets.*",
     "jiwer.*",
-    "scipy.*",
-    "typing.*"
+    "scipy.*"
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
