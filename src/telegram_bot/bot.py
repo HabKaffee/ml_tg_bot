@@ -1,7 +1,14 @@
 import os
 import logging
 
-from telegram import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
+from telegram import (
+    CallbackQuery,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+    Update,
+)
 
 from telegram.ext import (
     Application,
@@ -10,12 +17,10 @@ from telegram.ext import (
     ContextTypes,
     ConversationHandler,
     MessageHandler,
-    filters
+    filters,
 )
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
+logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
@@ -24,18 +29,18 @@ logger = logging.getLogger(__name__)
 ACTION_SELECTION, PHOTO_STICKER, PHOTO_EDIT, AUDIO = range(4)
 
 KEYBOARD = [
-        [InlineKeyboardButton("Convert audio to text", callback_data="audio")],
-        [InlineKeyboardButton("Edit the picture", callback_data="edit")],
-        [InlineKeyboardButton("Create sticker pack", callback_data="sticker")],
-        [InlineKeyboardButton("Cancel", callback_data="cancel")],
-    ]
+    [InlineKeyboardButton("Convert audio to text", callback_data="audio")],
+    [InlineKeyboardButton("Edit the picture", callback_data="edit")],
+    [InlineKeyboardButton("Create sticker pack", callback_data="sticker")],
+    [InlineKeyboardButton("Cancel", callback_data="cancel")],
+]
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Starts the conversation
     """
     menu_keyboard = InlineKeyboardMarkup(KEYBOARD)
-
 
     await update.message.reply_text(
         "Hi! Welcome to the bot. Choose the command to continue",
@@ -81,10 +86,10 @@ async def photo_to_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         return await restart(update, context)
 
     photo = await update.effective_message.photo[-1].get_file()
-    path = f'data/{update.effective_user.id}_sticker.png' 
+    path = f"data/{update.effective_user.id}_sticker.png"
     await photo.download_to_drive(path)
-    #temporarily echo the file
-    with open(path, 'rb') as photo_file:
+    # temporarily echo the file
+    with open(path, "rb") as photo_file:
         await update.effective_message.reply_photo(photo_file)
 
     return await restart(update, context)
@@ -94,9 +99,7 @@ async def audio_to_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     """
     Handler to gathed needed data and call audio to text conversion model
     """
-    await update.effective_message.reply_text(
-        "Audio to text placeholder"
-    )
+    await update.effective_message.reply_text("Audio to text placeholder")
     return await restart(update, context)
 
 
@@ -109,10 +112,10 @@ async def edit_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         return await restart(update, context)
 
     photo = await update.effective_message.photo[-1].get_file()
-    path = f'data/{update.effective_user.id}_edit.png' 
+    path = f"data/{update.effective_user.id}_edit.png"
     await photo.download_to_drive(path)
-    #temporarily echo the file
-    with open(path, 'rb') as photo_file:
+    # temporarily echo the file
+    with open(path, "rb") as photo_file:
         await update.effective_message.reply_photo(photo_file)
     return await restart(update, context)
 
@@ -121,6 +124,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Cancels the process and returns to the main menu."""
     await update.effective_message.reply_text("Okay, process canceled. Type /start to restart.")
     return ConversationHandler.END
+
 
 async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     menu_keyboard = InlineKeyboardMarkup(KEYBOARD)
@@ -132,11 +136,11 @@ async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 def main() -> None:
-    if not os.path.isdir('data/'):
+    if not os.path.isdir("data/"):
         logger.info("Creating data directory for files.")
-        os.mkdir('data/')
+        os.mkdir("data/")
 
-    app = Application.builder().token(os.environ['BOT_TOKEN']).build()
+    app = Application.builder().token(os.environ["BOT_TOKEN"]).build()
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
@@ -144,7 +148,7 @@ def main() -> None:
                 CallbackQueryHandler(audio_to_text_prompt, pattern="^audio"),
                 CallbackQueryHandler(edit_photo_prompt, pattern="^edit$"),
                 CallbackQueryHandler(photo_to_sticker_prompt, pattern="^sticker"),
-                CallbackQueryHandler(cancel, pattern="^cancel")
+                CallbackQueryHandler(cancel, pattern="^cancel"),
             ],
             PHOTO_EDIT: [
                 MessageHandler(filters.PHOTO, edit_photo),

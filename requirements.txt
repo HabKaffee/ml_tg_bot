@@ -6,3 +6,5 @@ transformers==4.49.0
 torch==2.6.0
 accelerate==1.4.0
 diffusers==0.32.2
+httpx==0.28.1
+python-telegram-bot==21.11.1
