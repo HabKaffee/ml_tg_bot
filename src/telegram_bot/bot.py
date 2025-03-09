@@ -76,9 +76,17 @@ async def photo_to_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     """
     Handler to gathed needed data and call sticker pack creation model
     """
-    await update.effective_message.reply_text(
-        "Photo to sticker placeholder"
-    )
+    if not update.effective_message.photo:
+        await update.effective_message.reply_text("Please provide photo first.")
+        return await restart(update, context)
+
+    photo = await update.effective_message.photo[-1].get_file()
+    path = f'data/{update.effective_user.id}_sticker.png' 
+    await photo.download_to_drive(path)
+    #temporarily echo the file
+    with open(path, 'rb') as photo_file:
+        await update.effective_message.reply_photo(photo_file)
+
     return await restart(update, context)
 
 
