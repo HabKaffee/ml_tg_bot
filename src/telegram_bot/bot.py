@@ -23,25 +23,18 @@ logger = logging.getLogger(__name__)
 
 ACTION_SELECTION, PHOTO_STICKER, PHOTO_EDIT, AUDIO = range(4)
 
-# async def menu_keyboard() -> InlineKeyboardMarkup:
-#     reply_keywords = [
-#         InlineKeyboardButton("Convert audio to text", callback_data="audio"),
-#         InlineKeyboardButton("Edit the picture", callback_data="edit"),
-#         InlineKeyboardButton("Create sticker pack", callback_data="sticker")
-#     ]
-#     return InlineKeyboardMarkup(reply_keywords)
-
+KEYBOARD = [
+        [InlineKeyboardButton("Convert audio to text", callback_data="audio")],
+        [InlineKeyboardButton("Edit the picture", callback_data="edit")],
+        [InlineKeyboardButton("Create sticker pack", callback_data="sticker")],
+        [InlineKeyboardButton("Cancel", callback_data="cancel")],
+    ]
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Starts the conversation
     """
-    keyboard = [
-        [InlineKeyboardButton("Convert audio to text", callback_data="audio")],
-        [InlineKeyboardButton("Edit the picture", callback_data="edit")],
-        [InlineKeyboardButton("Create sticker pack", callback_data="sticker")],
-    ]
-    menu_keyboard = InlineKeyboardMarkup(keyboard)
+    menu_keyboard = InlineKeyboardMarkup(KEYBOARD)
 
 
     await update.message.reply_text(
@@ -52,13 +45,30 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return ACTION_SELECTION
 
 
-async def audio_to_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """
-    Handler to gathed needed data and call audio to text conversion model
-    """
-    await update.effective_message.reply_text(
-        "Audio to text placeholder"
-    )
+async def photo_to_sticker_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handles the button click and asks for a photo."""
+    query = update.callback_query
+    await query.answer()
+    await query.message.reply_text("Please send a photo to prepare sticker.")
+
+    return PHOTO_STICKER
+
+
+async def edit_photo_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handles the button click and asks for a photo."""
+    query = update.callback_query
+    await query.answer()
+    await query.message.reply_text("Please send a photo to edit.")
+
+    return PHOTO_EDIT
+
+
+async def audio_to_text_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handles the button click and asks for a photo."""
+    query = update.callback_query
+    await query.answer()
+    await query.message.reply_text("Please send audio to transcribe.")
+
     return AUDIO
 
 
@@ -69,56 +79,81 @@ async def photo_to_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     await update.effective_message.reply_text(
         "Photo to sticker placeholder"
     )
-    return PHOTO_STICKER
+    return await restart(update, context)
+
+
+async def audio_to_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """
+    Handler to gathed needed data and call audio to text conversion model
+    """
+    await update.effective_message.reply_text(
+        "Audio to text placeholder"
+    )
+    return await restart(update, context)
 
 
 async def edit_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Handler to gathed needed data and call picture edit model
     """
-    await update.effective_message.reply_text(
-        "Edit photo placeholder"
+    if not update.effective_message.photo:
+        await update.effective_message.reply_text("Please provide photo first.")
+        return await restart(update, context)
+
+    photo = await update.effective_message.photo[-1].get_file()
+    path = f'data/{update.effective_user.id}_edit.png' 
+    await photo.download_to_drive(path)
+    #temporarily echo the file
+    with open(path, 'rb') as photo_file:
+        await update.effective_message.reply_photo(photo_file)
+    return await restart(update, context)
+
+
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Cancels the process and returns to the main menu."""
+    await update.effective_message.reply_text("Okay, process canceled. Type /start to restart.")
+    return ConversationHandler.END
+
+async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    menu_keyboard = InlineKeyboardMarkup(KEYBOARD)
+    await update.message.reply_text(
+        "Choose the command to continue",
+        reply_markup=menu_keyboard,
     )
-    return PHOTO_EDIT
-
-
-async def exit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Handler to exit
-    """
-    await update.effective_message.reply_text("All clear!")
-
-
-async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Handler for button reply
-    """
-    logger.info("Button handler")
-    query = update.callback_query
-    await query.answer()
-    
-    await update.effective_message.reply_text(f"Selected {query.data}")
-
-    if query.data == "audio":
-        await audio_to_text(update, context)
-    elif query.data == "sticker":
-        await photo_to_sticker(update, context)
-    elif query.data == "edit":
-        await edit_photo(update, context)
-    elif query.data == "exit":
-        await exit(update, context)
-    else:
-        print(f"unknown command: {query.data}")
+    return ACTION_SELECTION
 
 
 def main() -> None:
+    if not os.path.isdir('data/'):
+        logger.info("Creating data directory for files.")
+        os.mkdir('data/')
+
     app = Application.builder().token(os.environ['BOT_TOKEN']).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("audio", audio_to_text))
-    app.add_handler(CommandHandler("sticker", photo_to_sticker))
-    app.add_handler(CommandHandler("edit", edit_photo))
-    app.add_handler(CommandHandler("exit", exit))
-    app.add_handler(CallbackQueryHandler(button))
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("start", start)],
+        states={
+            ACTION_SELECTION: [
+                CallbackQueryHandler(audio_to_text_prompt, pattern="^audio"),
+                CallbackQueryHandler(edit_photo_prompt, pattern="^edit$"),
+                CallbackQueryHandler(photo_to_sticker_prompt, pattern="^sticker"),
+                CallbackQueryHandler(cancel, pattern="^cancel")
+            ],
+            PHOTO_EDIT: [
+                MessageHandler(filters.PHOTO, edit_photo),
+            ],
+            PHOTO_STICKER: [
+                MessageHandler(filters.PHOTO, photo_to_sticker),
+            ],
+            AUDIO: [
+                MessageHandler(filters.VOICE, audio_to_text),
+            ],
+        },
+        fallbacks=[CommandHandler("restart", restart)],
+        allow_reentry=True,
+        conversation_timeout=3600,
+    )
+
+    app.add_handler(conv_handler)
 
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
