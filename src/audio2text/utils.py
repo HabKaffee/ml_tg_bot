@@ -60,14 +60,13 @@ def gen_transcription(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, path_
     """Generates a transcription for a single audio file."""
     if not os.path.exists(path_to_file):
         raise FileNotFoundError(f"No file {path_to_file}")
-    else:
-        speech_array, _ = librosa.load(path_to_file, sr=16_000)
-        inputs = processor(speech_array, sampling_rate=16_000, return_tensors="pt", padding=True)
-        logits = model(inputs.input_values, attention_mask=inputs.attention_mask).logits
-        predicted_ids = torch.argmax(logits, dim=-1)
-        decoded = processor.batch_decode(predicted_ids)
-        transcription = cast(str, decoded[0]) if decoded else ""
-        return transcription
+    speech_array, _ = librosa.load(path_to_file, sr=16_000)
+    inputs = processor(speech_array, sampling_rate=16_000, return_tensors="pt", padding=True)
+    logits = model(inputs.input_values, attention_mask=inputs.attention_mask).logits
+    predicted_ids = torch.argmax(logits, dim=-1)
+    decoded = processor.batch_decode(predicted_ids)
+    transcription = cast(str, decoded[0]) if decoded else ""
+    return transcription
 
 
 def gen_transcription_whisper(
@@ -76,13 +75,12 @@ def gen_transcription_whisper(
     """Generates a transcription for a single audio file."""
     if not os.path.exists(path_to_file):
         raise FileNotFoundError(f"No file {path_to_file}")
-    else:
-        audio_input, _ = librosa.load(path_to_file, sr=16000)
-        input_features = processor(audio_input, return_tensors="pt").input_features
-        generated_ids = model.generate(input_features)
-        decoded = processor.decode(generated_ids[0], skip_special_tokens=True)
-        transcription = cast(str, decoded) if decoded else ""
-        return transcription
+    audio_input, _ = librosa.load(path_to_file, sr=16000)
+    input_features = processor(audio_input, return_tensors="pt").input_features
+    generated_ids = model.generate(input_features)
+    decoded = processor.decode(generated_ids[0], skip_special_tokens=True)
+    transcription = cast(str, decoded) if decoded else ""
+    return transcription
 
 
 def ogg_to_wav(path_to_file: str, path_to_new_file: str) -> None:
