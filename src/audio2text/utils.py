@@ -71,7 +71,7 @@ def gen_transcription(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, path_
     except FileNotFoundError:
         raise FileNotFoundError(f"No file {path_to_file}")
     except Exception as e:
-        raise RuntimeError(f"Error during transcription: {e}")
+        raise RuntimeError(f"Error during transcription: {e}") from e
 
 
 def gen_transcription_whisper(
@@ -89,7 +89,7 @@ def gen_transcription_whisper(
     except FileNotFoundError:
         raise FileNotFoundError(f"No file {path_to_file}")
     except Exception as e:
-        raise RuntimeError(f"Error during transcription: {e}")
+        raise RuntimeError(f"Error during transcription: {e}") from e
 
 
 def ogg_to_wav(path_to_file: str, path_to_new_file: str) -> None:
