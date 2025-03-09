@@ -68,8 +68,8 @@ def gen_transcription(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, path_
         decoded = processor.batch_decode(predicted_ids)
         transcription = cast(str, decoded[0]) if decoded else ""
         return transcription
-    except FileNotFoundError:
-        raise FileNotFoundError(f"No file {path_to_file}")
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(f"No file {path_to_file}") from exc
     except Exception as e:
         raise RuntimeError(f"Error during transcription: {e}") from e
 
@@ -86,8 +86,8 @@ def gen_transcription_whisper(
         decoded = processor.decode(generated_ids[0], skip_special_tokens=True)
         transcription = cast(str, decoded) if decoded else ""
         return transcription
-    except FileNotFoundError:
-        raise FileNotFoundError(f"No file {path_to_file}")
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(f"No file {path_to_file}") from exc
     except Exception as e:
         raise RuntimeError(f"Error during transcription: {e}") from e
 

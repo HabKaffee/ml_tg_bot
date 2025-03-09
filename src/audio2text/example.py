@@ -1,6 +1,7 @@
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor, WhisperForConditionalGeneration, WhisperProcessor
-from src.audio2text.utils import (calc_test_metrics, gen_transcription, gen_transcription_whisper, gen_transcriptions_golos,
-                   load_data_golos)
+
+from src.audio2text.utils import (calc_test_metrics, gen_transcription, gen_transcription_whisper,
+                                  gen_transcriptions_golos, load_data_golos)
 
 # load whisper model and processor
 processor_wh = WhisperProcessor.from_pretrained("openai/whisper-large-v2")
