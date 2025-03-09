@@ -19,7 +19,7 @@ def load_data_golos(path_to_audio: str) -> list[str]:
     data_ = ds["test"]
     real_transcriptions = []
     for i, smpl in tqdm.tqdm(enumerate(data_)):
-        filename = path_to_audio + f"/output_{i}.wav"
+        filename = os.path.join(path_to_audio, f"output_{i}.wav")
         write(filename, smpl["audio"]["sampling_rate"], smpl["audio"]["array"])
         real_transcriptions.append(smpl["transcription"])
         # Audio(smpl["audio"]["array"], rate=smpl["audio"]["sampling_rate"])
@@ -27,11 +27,15 @@ def load_data_golos(path_to_audio: str) -> list[str]:
 
 
 def gen_transcriptions_golos(
-    model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, num_samples: int = 10, whisper_flag: bool = False
+    model: Wav2Vec2ForCTC,
+    processor: Wav2Vec2Processor,
+    num_samples: int = 10,
+    folder_to_audio: str = "audio_files",
+    whisper_flag: bool = False,
 ) -> list[str]:
     """Generates transcriptions for stored audio files using a speech model."""
     transcriptions = []
-    audio_paths = [f"./audio_files/output_{i}.wav" for i in range(num_samples)]
+    audio_paths = [os.path.join(folder_to_audio, f"output_{i}.wav") for i in range(num_samples)]
     for audio_path in audio_paths:
         if whisper_flag:
             transcription = gen_transcription_whisper(model, processor, audio_path)
@@ -55,7 +59,7 @@ def calc_test_metrics(real_transcriptions: list[str], generated_transcriptions: 
 
 def gen_transcription(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, path_to_file: str) -> str:
     """Generates a transcription for a single audio file."""
-    if os.path.exists(path_to_file):
+    try:
         speech_array, _ = librosa.load(path_to_file, sr=16_000)
         inputs = processor(speech_array, sampling_rate=16_000, return_tensors="pt", padding=True)
         with torch.no_grad():
@@ -64,22 +68,28 @@ def gen_transcription(model: Wav2Vec2ForCTC, processor: Wav2Vec2Processor, path_
         decoded = processor.batch_decode(predicted_ids)
         transcription = cast(str, decoded[0]) if decoded else ""
         return transcription
-    raise FileNotFoundError(f"No file {path_to_file}")
+    except FileNotFoundError:
+        raise FileNotFoundError(f"No file {path_to_file}")
+    except Exception as e:
+        raise RuntimeError(f"Error during transcription: {e}")
 
 
 def gen_transcription_whisper(
     model: WhisperForConditionalGeneration, processor: WhisperProcessor, path_to_file: str
 ) -> str:
     """Generates a transcription for a single audio file."""
-    if os.path.exists(path_to_file):
+    try:
         audio_input, _ = librosa.load(path_to_file, sr=16000)
         input_features = processor(audio_input, return_tensors="pt").input_features
         with torch.no_grad():
             generated_ids = model.generate(input_features)
-        decoded = processor.batch_decode(generated_ids[0], skip_special_tokens=True)
+        decoded = processor.decode(generated_ids[0], skip_special_tokens=True)
         transcription = cast(str, decoded) if decoded else ""
         return transcription
-    raise FileNotFoundError(f"No file {path_to_file}")
+    except FileNotFoundError:
+        raise FileNotFoundError(f"No file {path_to_file}")
+    except Exception as e:
+        raise RuntimeError(f"Error during transcription: {e}")
 
 
 def ogg_to_wav(path_to_file: str, path_to_new_file: str) -> None:
