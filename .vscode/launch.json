@@ -8,7 +8,7 @@
             "name": "ImageProcessor Example",
             "type": "debugpy",
             "request": "launch",
-            "program": "src/image_processing/examle.py",
+            "program": "src/image_processing/example.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "args": [
@@ -27,10 +27,7 @@
             "program": "src/sticker_generator/example.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
-            "args": [
-                "--command-parser",
-                "ai"
-            ],
+            "args": [],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
                 "TOKENIZERS_PARALLELISM": "false"
