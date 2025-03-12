@@ -5,7 +5,7 @@ from src.sticker_generator.sticker_generator import StickerGenerator
 os.makedirs("tmp", exist_ok=True)
 
 
-def test_sticker_generator():
+def test_sticker_generator() -> None:
     sticker_gen = StickerGenerator()
     input_image = get_random_cat_image().convert("RGB")
 
