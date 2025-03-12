@@ -125,7 +125,7 @@ class StickerGenerator:
             new_h = max_size
             new_w = int(aspect_ratio * max_size)
 
-        image = image.resize((new_w, new_h), Image.LANCZOS)
+        image = image.resize((new_w, new_h), Image.Resampling.LANCZOS)
         final = Image.new("RGBA", (max_size, max_size), (0, 0, 0, 0))
         final.paste(image, ((max_size - new_w) // 2, (max_size - new_h) // 2))
         return final
