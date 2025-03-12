@@ -1,6 +1,6 @@
 import os
 from src.utils import get_random_cat_image
-from src.sticker_generator import StickerGenerator
+from src.sticker_generator.sticker_generator import StickerGenerator
 
 os.makedirs("tmp", exist_ok=True)
 
