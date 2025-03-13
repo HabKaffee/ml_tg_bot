@@ -1,8 +1,6 @@
-import os
+from pathlib import Path
 from src.utils import get_random_cat_image
 from src.sticker_generator.sticker_generator import StickerGenerator
-
-from pathlib import Path
 
 basePath = "data/processed_stickers"
 Path(basePath).mkdir(parents=True, exist_ok=True)
