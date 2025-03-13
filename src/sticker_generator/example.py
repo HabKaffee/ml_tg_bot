@@ -2,17 +2,20 @@ import os
 from src.utils import get_random_cat_image
 from src.sticker_generator.sticker_generator import StickerGenerator
 
-os.makedirs("tmp", exist_ok=True)
+from pathlib import Path
+
+basePath = "data/processed_stickers"
+Path(basePath).mkdir(parents=True, exist_ok=True)
 
 
 def test_sticker_generator() -> None:
     sticker_gen = StickerGenerator()
     input_image = get_random_cat_image().convert("RGB")
 
-    input_path = "tmp/test_input.png"
+    input_path = f"{basePath}/test_input.png"
     input_image.save(input_path)
 
-    output_path = "tmp/result.png"
+    output_path = f"{basePath}/result.png"
     result_image = sticker_gen.generate_sticker(input_image)
 
     if result_image:
