@@ -81,18 +81,17 @@ class AICommandParser(CommandParser):
         )
 
     def _get_llm_output(self, input_text: str) -> List[Dict[str, Union[str, Dict]]]:
-        basic_prompt = self._prompter.prepare_prompt()
-        messages = [
-            {
-                "role": "system",
-                "content": basic_prompt,
-            },
-            {"role": "user", "content": input_text},
-        ]
+        messages = []
+
+        messages.append({"role": "system", "content": self._prompter.prepare_prompt()})
         if self._image_parameters:
             messages.append(
-                {"role": "user", "content": f"Вот информация об исходном изображении {self._image_parameters}"}
+                {
+                    "role": "system",
+                    "content": f"Прими во внимание информацию об исходном изображении: {self._image_parameters}",
+                }
             )
+        messages.append({"role": "user", "content": input_text})
 
         prompt = self._pipeline.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         outputs = self._pipeline(prompt)
