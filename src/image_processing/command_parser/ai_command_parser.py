@@ -3,8 +3,10 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
+import cv2
+import numpy as np
 import torch
-from PIL import Image
+from PIL import Image, ImageStat
 from transformers import pipeline
 
 from src.image_processing.command import Command, CommandParameters
@@ -16,9 +18,7 @@ def process_json_text(input_text: str) -> str:
     return input_text.replace("\n", "").replace("'", '"')
 
 
-import cv2
-import numpy as np
-from PIL import Image, ImageStat
+
 
 
 class AIPrompter:
