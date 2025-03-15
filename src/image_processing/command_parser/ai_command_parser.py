@@ -16,6 +16,11 @@ def process_json_text(input_text: str) -> str:
     return input_text.replace("\n", "").replace("'", '"')
 
 
+import cv2
+import numpy as np
+from PIL import Image, ImageStat
+
+
 class AIPrompter:
     def __init__(self) -> None:
         self._basic_prompt = self._prepare_basic_prompt()
@@ -58,11 +63,6 @@ class AIPrompter:
         {self._few_shot_prompt}
         """
         return prompt
-
-
-import cv2
-import numpy as np
-from PIL import Image, ImageStat
 
 
 def get_image_size(image: Image.Image) -> tuple:
