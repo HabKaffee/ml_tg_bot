@@ -1,9 +1,10 @@
 import json
 import re
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 import torch
+from PIL import Image
 from transformers import pipeline
 
 from src.image_processing.command import Command, CommandParameters
@@ -59,6 +60,97 @@ class AIPrompter:
         return prompt
 
 
+import cv2
+import numpy as np
+from PIL import Image, ImageStat
+
+
+def get_image_size(image: Image.Image) -> tuple:
+    """
+    Get the original size of the image.
+
+    Args:
+        image (Image.Image): The image to be analyzed.
+
+    Returns:
+        tuple: The width and height of the image.
+    """
+    return image.size
+
+
+def get_average_brightness(image: Image.Image) -> float:
+    """
+    Get the average brightness of the image.
+
+    Args:
+        image (Image.Image): The image to be analyzed.
+
+    Returns:
+        float: The average brightness of the image.
+    """
+    grayscale_image = image.convert("L")
+    stat = ImageStat.Stat(grayscale_image)
+    return stat.mean[0]
+
+
+def get_contrast(image: Image.Image) -> float:
+    """
+    Get the contrast of the image.
+
+    Args:
+        image (Image.Image): The image to be analyzed.
+
+    Returns:
+        float: The contrast of the image.
+    """
+    grayscale_image = image.convert("L")
+    stat = ImageStat.Stat(grayscale_image)
+    return stat.stddev[0]
+
+
+def get_color_space(image: Image.Image) -> str:
+    """
+    Get the color space of the image.
+
+    Args:
+        image (Image.Image): The image to be analyzed.
+
+    Returns:
+        str: The color space of the image.
+    """
+    return image.mode
+
+
+def get_saturation(image: Image.Image) -> float:
+    """
+    Get the saturation of the image.
+
+    Args:
+        image (Image.Image): The image to be analyzed.
+
+    Returns:
+        float: The saturation of the image.
+    """
+    hsv_image = image.convert("HSV")
+    stat = ImageStat.Stat(hsv_image)
+    return stat.mean[1]
+
+
+def get_level_of_detail(image: Image.Image) -> float:
+    """
+    Get the level of detail of the image.
+
+    Args:
+        image (Image.Image): The image to be analyzed.
+
+    Returns:
+        float: The level of detail of the image.
+    """
+    grayscale_image = image.convert("L")
+    laplacian = cv2.Laplacian(np.array(grayscale_image), cv2.CV_64F)
+    return float(laplacian.var())
+
+
 class AICommandParser(CommandParser):
     """
     Command parser based on LLM
@@ -68,6 +160,8 @@ class AICommandParser(CommandParser):
         super().__init__()
         self._prompter = AIPrompter()
         self._json_pattern = re.compile(r".*(?P<json>\[.*\]).*")
+
+        self._image_parameters: Dict[str, Any] = {}
 
         self._model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
         self._pipeline = pipeline(
@@ -83,6 +177,10 @@ class AICommandParser(CommandParser):
             },
             {"role": "user", "content": input_text},
         ]
+        if self._image_parameters:
+            messages.append(
+                {"role": "user", "content": f"Вот информация об исходном изображении {self._image_parameters}"}
+            )
 
         prompt = self._pipeline.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         outputs = self._pipeline(prompt)
@@ -108,3 +206,13 @@ class AICommandParser(CommandParser):
             command_parameters = CommandParameters(**parameters)
             commands.append(Command(kernel_type, command_parameters))
         return commands
+
+    def analyze_image(self, image: Image.Image) -> None:
+        self._image_parameters = {
+            "original_size": get_image_size(image),
+            "average_brightness": get_average_brightness(image),
+            "contrast": get_contrast(image),
+            "color_space": get_color_space(image),
+            "saturation": get_saturation(image),
+            "level_of_detail": get_level_of_detail(image),
+        }

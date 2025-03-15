@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+from PIL import Image
+
 from src.image_processing.command import Command
 
 
@@ -12,9 +14,15 @@ class CommandParser(ABC):
     @abstractmethod
     def parse_text(self, text: str) -> List[Command]:
         """
-        Parse text to commands
+        Parse text
         Args:
-            text: input text
-        Returns:
-            commands: list of commands
+            text (str): text to parse
+        """
+
+    @abstractmethod
+    def analyze_image(self, image: Image.Image) -> None:
+        """
+        Parse image
+        Args:
+            image (Image.Image): image to parse
         """

@@ -35,6 +35,7 @@ def main() -> None:
     random_cat_image = get_random_cat_image()
     random_cat_image.show()
 
+    commands = text_processor.analyze_image(random_cat_image)
     commands = text_processor.parse_text(args.input_text)
 
     processed_image = image_processor.get_processed_image(image=random_cat_image, command_queue=commands)
