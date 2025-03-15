@@ -18,9 +18,6 @@ def process_json_text(input_text: str) -> str:
     return input_text.replace("\n", "").replace("'", '"')
 
 
-
-
-
 class AIPrompter:
     def __init__(self) -> None:
         self._basic_prompt = self._prepare_basic_prompt()
