@@ -4,15 +4,15 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
-import cv2
-import numpy as np
 import torch
-from PIL import Image, ImageStat
+from PIL import Image
 from transformers import pipeline
 
 from src.image_processing.command import Command, CommandParameters
 from src.image_processing.command_parser.command_parser import CommandParser
 from src.image_processing.kernels.kernel_types import KernelTypes
+from src.image_processing.utils import (get_average_brightness, get_color_space, get_contrast, get_image_size,
+                                        get_level_of_detail, get_saturation)
 
 
 def process_json_text(input_text: str) -> str:
@@ -61,92 +61,6 @@ class AIPrompter:
         {self._few_shot_prompt}
         """
         return prompt
-
-
-def get_image_size(image: Image.Image) -> Dict[str, int]:
-    """
-    Get the original size of the image.
-
-    Args:
-        image (Image.Image): The image to be analyzed.
-
-    Returns:
-        dict: The original size of the image.
-    """
-    return {"width": image.width, "height": image.height}
-
-
-def get_average_brightness(image: Image.Image) -> float:
-    """
-    Get the average brightness of the image.
-
-    Args:
-        image (Image.Image): The image to be analyzed.
-
-    Returns:
-        float: The average brightness of the image.
-    """
-    grayscale_image = image.convert("L")
-    stat = ImageStat.Stat(grayscale_image)
-    return stat.mean[0]
-
-
-def get_contrast(image: Image.Image) -> float:
-    """
-    Get the contrast of the image.
-
-    Args:
-        image (Image.Image): The image to be analyzed.
-
-    Returns:
-        float: The contrast of the image.
-    """
-    grayscale_image = image.convert("L")
-    stat = ImageStat.Stat(grayscale_image)
-    return stat.stddev[0]
-
-
-def get_color_space(image: Image.Image) -> str:
-    """
-    Get the color space of the image.
-
-    Args:
-        image (Image.Image): The image to be analyzed.
-
-    Returns:
-        str: The color space of the image.
-    """
-    return image.mode
-
-
-def get_saturation(image: Image.Image) -> float:
-    """
-    Get the saturation of the image.
-
-    Args:
-        image (Image.Image): The image to be analyzed.
-
-    Returns:
-        float: The saturation of the image.
-    """
-    hsv_image = image.convert("HSV")
-    stat = ImageStat.Stat(hsv_image)
-    return stat.mean[1]
-
-
-def get_level_of_detail(image: Image.Image) -> float:
-    """
-    Get the level of detail of the image.
-
-    Args:
-        image (Image.Image): The image to be analyzed.
-
-    Returns:
-        float: The level of detail of the image.
-    """
-    grayscale_image = image.convert("L")
-    laplacian = cv2.Laplacian(np.array(grayscale_image), cv2.CV_64F)
-    return float(laplacian.var())
 
 
 class AICommandParser(CommandParser):
