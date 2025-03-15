@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 from pathlib import Path
 from typing import Any, Dict, List, Union
@@ -166,11 +167,11 @@ class AICommandParser(CommandParser):
         )
 
     def _get_llm_output(self, input_text: str) -> List[Dict[str, Union[str, Dict]]]:
-        prompt = self._prompter.prepare_prompt()
+        basic_prompt = self._prompter.prepare_prompt()
         messages = [
             {
                 "role": "system",
-                "content": prompt,
+                "content": basic_prompt,
             },
             {"role": "user", "content": input_text},
         ]
@@ -183,6 +184,8 @@ class AICommandParser(CommandParser):
         outputs = self._pipeline(prompt)
 
         processed_text = process_json_text(outputs[0]["generated_text"])
+        logging.info(f"Received from LLM: {processed_text}")
+
         processed_text_match = self._json_pattern.match(processed_text)
 
         if processed_text_match:
@@ -213,3 +216,4 @@ class AICommandParser(CommandParser):
             "saturation": get_saturation(image),
             "level_of_detail": get_level_of_detail(image),
         }
+        logging.info(f"Original image parameters: {self._image_parameters}")

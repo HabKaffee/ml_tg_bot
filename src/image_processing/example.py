@@ -1,3 +1,4 @@
+import logging
 from io import BytesIO
 
 import requests
@@ -6,6 +7,8 @@ from tap import Tap
 
 from src.image_processing.command_parser.command_parser_creator import CommandParserTypes, get_command_parser
 from src.image_processing.image_processor import ImageProcessor
+
+logging.basicConfig(level=logging.NOTSET)
 
 
 def get_random_cat_image() -> Image.Image:
@@ -23,7 +26,7 @@ def get_random_cat_image() -> Image.Image:
 
 class Arguments(Tap):
     command_parser: CommandParserTypes = CommandParserTypes.AI
-    input_text: str = "повернуть на 90 градусов и сделать черно белым"
+    input_text: str = "повернуть на 90 градусов и сделать черно белым, подними немного яркость"
 
 
 def main() -> None:
