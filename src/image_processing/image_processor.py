@@ -43,6 +43,6 @@ class ImageProcessor:
         """
         for command in command_queue:
             if command.kernel_type in self._kernel_map:
-                logging.info(f"Applying command: {command.kernel_type} with parameters: {command.parameters}")
+                logging.info("Applying command: %s with parameters: %s", command.kernel_type, command.parameters)
                 image = self._kernel_map[command.kernel_type].process(image=image, params=command.parameters)
         return image

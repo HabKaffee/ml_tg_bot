@@ -8,7 +8,7 @@ from tap import Tap
 from src.image_processing.command_parser.command_parser_creator import CommandParserTypes, get_command_parser
 from src.image_processing.image_processor import ImageProcessor
 
-logging.basicConfig(level=logging.NOTSET)
+logging.basicConfig(level=logging.WARNING)
 
 
 def get_random_cat_image() -> Image.Image:
