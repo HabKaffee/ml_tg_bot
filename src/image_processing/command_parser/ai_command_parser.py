@@ -62,7 +62,7 @@ class AIPrompter:
         return prompt
 
 
-def get_image_size(image: Image.Image) -> tuple:
+def get_image_size(image: Image.Image) -> Dict[str, int]:
     """
     Get the original size of the image.
 
@@ -70,9 +70,9 @@ def get_image_size(image: Image.Image) -> tuple:
         image (Image.Image): The image to be analyzed.
 
     Returns:
-        tuple: The width and height of the image.
+        dict: The original size of the image.
     """
-    return image.size
+    return {"width": image.width, "height": image.height}
 
 
 def get_average_brightness(image: Image.Image) -> float:
