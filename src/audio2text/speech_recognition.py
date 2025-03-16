@@ -2,7 +2,7 @@ import os
 import time
 from typing import List, cast
 
-import librosa
+import librosa # pylint: disable=import-error
 import numpy as np
 import soundfile as sf
 import torch
@@ -64,7 +64,7 @@ class SpeechRecognition:
         transcription = cast(str, decoded[0]) if decoded else ""
         return transcription
 
-    def _gen_transcription_whisper(self, path_to_file: str) -> str:
+    def gen_transcription_whisper(self, path_to_file: str) -> str:
         allowed_formats = {".wav", ".ogg"}
         _, ext = os.path.splitext(path_to_file)
         ext = ext.lower()
