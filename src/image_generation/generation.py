@@ -38,9 +38,8 @@ class StableDiffusionPipeline:
             self._model_path, 
             torch_dtype=torch.float16,   
             safety_checker=None
-        )
-        self._pipeline.to("cuda")
-        self._pipeline.enable_attention_slicing()
+        ).to("cuda")
+
 
     def generate_image(
         self,
