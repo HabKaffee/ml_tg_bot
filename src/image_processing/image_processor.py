@@ -6,7 +6,7 @@ from PIL import Image
 
 from src.image_processing.command_parser.command_parser import Command
 from src.image_processing.kernels.kernel_map import get_kernel_map
-from src.image_processing.utils import cv2_to_pil, pil_to_cv2
+from src.utils import cv2_to_pil, pil_to_cv2
 
 
 class ImageProcessor:
