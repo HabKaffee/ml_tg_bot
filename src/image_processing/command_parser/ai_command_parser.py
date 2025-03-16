@@ -11,8 +11,14 @@ from transformers import pipeline
 from src.image_processing.command import Command, CommandParameters
 from src.image_processing.command_parser.command_parser import CommandParser
 from src.image_processing.kernels.kernel_types import KernelTypes
-from src.utils import (get_average_brightness, get_color_space, get_contrast, get_image_size, get_level_of_detail,
-                       get_saturation)
+from src.utils import (
+    get_average_brightness,
+    get_color_space,
+    get_contrast,
+    get_image_size,
+    get_level_of_detail,
+    get_saturation,
+)
 
 
 def process_json_text(input_text: str) -> str:

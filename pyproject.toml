@@ -1,27 +1,15 @@
 [tool.isort]
 line_length = 120
+profile = "black"
 
 [tool.black]
 line-length = 120
 target-version = ['py310']
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
 
 [tool.mypy]
 warn_return_any = true
 warn_unused_configs = true
+warn_unused_ignores = true
 disallow_untyped_defs = true
 
 # Ignore specific packages
