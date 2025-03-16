@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Dict, List, Union
 
 import torch
 from PIL import Image
@@ -79,7 +79,7 @@ class AICommandParser(CommandParser):
         self._prompter = AIPrompter()
         self._json_pattern = re.compile(r".*(?P<json>\[.*\]).*")
 
-        self._image_parameters: Dict[str, Any] = {}
+        self._image_parameters: Dict[str, Union[float, str, Dict[str, int]]] = {}
 
         self._model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
         self._pipeline = pipeline(
