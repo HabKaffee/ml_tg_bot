@@ -10,7 +10,7 @@ def main() -> None:
     device = "cuda" if torch.cuda.is_available() else "cpu"
     speech_rec = SpeechRecognition(model_path=MODEL_PATH, processor_path=PROCESSOR_PATH, device=device, whisper=True)
 
-    generated_transcription_wh = speech_rec._gen_transcription_whisper("./audio_files/Example.ogg")
+    generated_transcription_wh = speech_rec.gen_transcription_whisper("./audio_files/Example.ogg")
     print(generated_transcription_wh)
 
 
