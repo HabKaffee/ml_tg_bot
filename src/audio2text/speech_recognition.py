@@ -51,7 +51,7 @@ class SpeechRecognition:
             raise FileNotFoundError(f"No file {path_to_file}")
 
         if self.whisper:
-            return self._gen_transcription_whisper(path_to_file)
+            return self.gen_transcription_whisper(path_to_file)
         return self._gen_transcription_wav2vec(path_to_file)
 
     def _gen_transcription_wav2vec(self, path_to_file: str) -> str:
