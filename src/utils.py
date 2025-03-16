@@ -1,10 +1,10 @@
+from io import BytesIO
 from typing import Dict
 
 import cv2
 import numpy as np
-from PIL import Image, ImageStat
-from io import BytesIO
 import requests
+from PIL import Image, ImageStat
 
 
 def pil_to_cv2(image: Image.Image) -> np.ndarray:
