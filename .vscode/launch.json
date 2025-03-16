@@ -4,17 +4,30 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
             "name": "ImageProcessor Example",
             "type": "debugpy",
             "request": "launch",
-            "program": "src/image_processing/examle.py",
+            "program": "src/image_processing/example.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "args": [
-                "--command-parser", "ai"
+                "--command-parser",
+                "ai"
             ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "TOKENIZERS_PARALLELISM": "false"
+            }
+        },
+        {
+            "name": "StickerGenerator Example",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/sticker_generator/example.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "args": [],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
                 "TOKENIZERS_PARALLELISM": "false"
