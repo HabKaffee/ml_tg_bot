@@ -52,8 +52,7 @@ class SpeechRecognition:
 
         if self.whisper:
             return self._gen_transcription_whisper(path_to_file)
-        else:
-            return self._gen_transcription_wav2vec(path_to_file)
+        return self._gen_transcription_wav2vec(path_to_file)
 
     def _gen_transcription_wav2vec(self, path_to_file: str) -> str:
         speech_array, _ = librosa.load(path_to_file, sr=16_000)
