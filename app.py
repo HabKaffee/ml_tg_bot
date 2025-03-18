@@ -18,14 +18,15 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    Path("data/").mkdir(parents=True, exist_ok=True)
+    data_folder = "data/"
+    Path(data_folder).mkdir(parents=True, exist_ok=True)
     Path("models/").mkdir(parents=True, exist_ok=True)
 
     app = Application.builder().token(os.environ["BOT_TOKEN"]).build()
     image_processor = ImageProcessor()
     sticker_generator = StickerGenerator()
 
-    bot = TelegramBot("", image_processor, sticker_generator, logger)
+    bot = TelegramBot("", image_processor, sticker_generator, logger, data_folder)
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", bot.start)],
         states={

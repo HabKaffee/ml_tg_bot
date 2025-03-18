@@ -12,12 +12,18 @@ from .utils import BOT_STATES, KEYBOARD
 
 class TelegramBot:
     def __init__(
-        self, audio_processor: Any, image_processor: ImageProcessor, sticker_processor: StickerGenerator, logger: Logger
+        self,
+        audio_processor: Any,
+        image_processor: ImageProcessor,
+        sticker_processor: StickerGenerator,
+        logger: Logger,
+        data_folder="data/",
     ) -> None:
         self.audio_processor = audio_processor
         self.image_processor = image_processor
         self.sticker_processor = sticker_processor
         self.logger = logger
+        self.data_folder = data_folder
 
     async def start(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
         """
@@ -77,9 +83,9 @@ class TelegramBot:
             return await self.restart(update, context)
         photo = await update.effective_message.photo[-1].get_file()
         if update.effective_user:
-            path = f"data/{update.effective_user.id}_sticker.png"
+            path = f"{self.data_folder}/{update.effective_user.id}_sticker.png"
         else:
-            path = "data/unknown_user_id_sticker.png"
+            path = f"{self.data_folder}/unknown_user_id_sticker.png"
         await photo.download_to_drive(path)
         # temporarily echo the file
         with open(path, "rb") as photo_file:
@@ -112,9 +118,9 @@ class TelegramBot:
 
         photo = await update.effective_message.photo[-1].get_file()
         if update.effective_user:
-            path = f"data/{update.effective_user.id}_edit.png"
+            path = f"{self.data_folder}/{update.effective_user.id}_edit.png"
         else:
-            path = "data/unknown_user_id_edit.png"
+            path = f"{self.data_folder}/unknown_user_id_edit.png"
         await photo.download_to_drive(path)
         # temporarily echo the file
         with open(path, "rb") as photo_file:
