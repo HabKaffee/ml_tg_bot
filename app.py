@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 from telegram import Update
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ConversationHandler, MessageHandler, filters
@@ -17,12 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    if not os.path.isdir("data/"):
-        logger.info("Creating data directory for files.")
-        os.mkdir("data/")
-    if not os.path.isdir("models/"):
-        logger.info("Creating models directory for models")
-        os.mkdir("models/")
+    Path("data/").mkdir(parents=True, exist_ok=True)
+    Path("models/").mkdir(parents=True, exist_ok=True)
 
     app = Application.builder().token(os.environ["BOT_TOKEN"]).build()
     image_processor = ImageProcessor()
