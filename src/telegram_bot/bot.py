@@ -1,4 +1,5 @@
 from logging import Logger
+from pathlib import Path
 from typing import Any
 
 from telegram import InlineKeyboardMarkup, Update
@@ -11,13 +12,13 @@ from .utils import BOT_STATES, KEYBOARD
 
 
 class TelegramBot:
-    def __init__(
+    def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         audio_processor: Any,
         image_processor: ImageProcessor,
         sticker_processor: StickerGenerator,
         logger: Logger,
-        data_folder="data/",
+        data_folder: Path = Path("data/"),
     ) -> None:
         self.audio_processor = audio_processor
         self.image_processor = image_processor

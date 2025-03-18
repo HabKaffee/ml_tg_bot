@@ -2,5 +2,6 @@
 
 source config/bootstrap.sh
 
-black config/ --check
-black src/ --check
+isort config/ --check
+isort src/ --check
+isort app.py --check
