@@ -3,8 +3,8 @@ from typing import Optional
 import cv2
 import numpy as np
 import torch
-from segment_anything import sam_model_registry, SamPredictor  # type: ignore
 from PIL import Image
+from segment_anything import SamPredictor, sam_model_registry  # type: ignore
 
 from src.utils import pil_to_cv2
 

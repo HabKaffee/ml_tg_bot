@@ -1,20 +1,13 @@
-import os
 import logging
-
-from bot import TelegramBot
-from utils import BOT_STATES
+import os
 
 from telegram import Update
+from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ConversationHandler, MessageHandler, filters
 
-from telegram.ext import (
-    Application,
-    CallbackQueryHandler,
-    CommandHandler,
-    ConversationHandler,
-    MessageHandler,
-    filters,
-)
-
+from src.image_processing.image_processor import ImageProcessor
+from src.sticker_generator.sticker_generator import StickerGenerator
+from src.telegram_bot.bot import TelegramBot
+from src.telegram_bot.utils import BOT_STATES
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
@@ -27,9 +20,15 @@ def main() -> None:
     if not os.path.isdir("data/"):
         logger.info("Creating data directory for files.")
         os.mkdir("data/")
+    if not os.path.isdir("models/"):
+        logger.info("Creating models directory for models")
+        os.mkdir("models/")
 
     app = Application.builder().token(os.environ["BOT_TOKEN"]).build()
-    bot = TelegramBot("", "", "", logger)
+    image_processor = ImageProcessor()
+    sticker_generator = StickerGenerator()
+
+    bot = TelegramBot("", image_processor, sticker_generator, logger)
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", bot.start)],
         states={

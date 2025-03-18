@@ -1,31 +1,26 @@
 import os
+from logging import Logger
+from typing import Any
 
-from utils import BOT_STATES, KEYBOARD
+from telegram import InlineKeyboardMarkup, Update
+from telegram.ext import ContextTypes, ConversationHandler
 
-from telegram import (
-    InlineKeyboardMarkup,
-    Update,
-)
+from src.image_processing.image_processor import ImageProcessor
+from src.sticker_generator.sticker_generator import StickerGenerator
 
-from telegram.ext import (
-    ContextTypes,
-    ConversationHandler,
-)
+from .utils import BOT_STATES, KEYBOARD
 
 
 class TelegramBot:
-    def __init__(self,
-                 audio_processor,
-                 image_processor,
-                 sticker_processor,
-                 logger):
+    def __init__(
+        self, audio_processor: Any, image_processor: ImageProcessor, sticker_processor: StickerGenerator, logger: Logger
+    ) -> None:
         self.audio_processor = audio_processor
         self.image_processor = image_processor
         self.sticker_processor = sticker_processor
         self.logger = logger
-        
 
-    async def start(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> int:
+    async def start(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
         """
         Starts the conversation
         """
@@ -41,8 +36,7 @@ class TelegramBot:
 
         return BOT_STATES.ACTION_SELECTION
 
-
-    async def photo_to_sticker_prompt(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> int:
+    async def photo_to_sticker_prompt(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
         """Handles the button click and asks for a photo."""
         if update.callback_query:
             query = update.callback_query
@@ -53,8 +47,7 @@ class TelegramBot:
             self.logger.error("Exception in photo_to_sticker_prompt")
         return BOT_STATES.PHOTO_STICKER
 
-
-    async def edit_photo_prompt(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> int:
+    async def edit_photo_prompt(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
         """Handles the button click and asks for a photo."""
         if update.callback_query:
             query = update.callback_query
@@ -64,8 +57,7 @@ class TelegramBot:
             self.logger.error("Exception in edit_photo_prompt")
         return BOT_STATES.PHOTO_EDIT
 
-
-    async def audio_to_text_prompt(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> int:
+    async def audio_to_text_prompt(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
         """Handles the button click and asks for a photo."""
         if update.callback_query:
             query = update.callback_query
@@ -75,8 +67,7 @@ class TelegramBot:
             self.logger.error("Exception in audio_to_text_prompt")
         return BOT_STATES.AUDIO
 
-
-    async def photo_to_sticker(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    async def photo_to_sticker(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
         """
         Handler to gathed needed data and call sticker pack creation model
         """
@@ -98,8 +89,7 @@ class TelegramBot:
 
         return await self.restart(update, context)
 
-
-    async def audio_to_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    async def audio_to_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
         """
         Handler to gathed needed data and call audio to text conversion model
         """
@@ -110,8 +100,7 @@ class TelegramBot:
         await update.effective_message.reply_text("Audio to text placeholder")
         return await self.restart(update, context)
 
-
-    async def edit_photo(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    async def edit_photo(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
         """
         Handler to gathed needed data and call picture edit model
         """
@@ -134,7 +123,6 @@ class TelegramBot:
             await update.effective_message.reply_photo(photo_file)
         return await self.restart(update, context)
 
-
     async def cancel(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> int:
         """Cancels the process and returns to the main menu."""
         if update.effective_message:
@@ -143,8 +131,7 @@ class TelegramBot:
             self.logger.error("Exception in cancel")
         return ConversationHandler.END
 
-
-    async def restart(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> int:
+    async def restart(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
         menu_keyboard = InlineKeyboardMarkup(KEYBOARD)
         if update.message:
             await update.message.reply_text(
@@ -154,4 +141,3 @@ class TelegramBot:
         else:
             self.logger.error("Can't render keyboard")
         return BOT_STATES.ACTION_SELECTION
-
