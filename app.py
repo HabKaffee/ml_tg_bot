@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    data_folder = "data/"
-    Path(data_folder).mkdir(parents=True, exist_ok=True)
+    data_folder = Path("data/")
+    data_folder.mkdir(parents=True, exist_ok=True)
     Path("models/").mkdir(parents=True, exist_ok=True)
 
     app = Application.builder().token(os.environ["BOT_TOKEN"]).build()
