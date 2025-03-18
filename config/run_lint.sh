@@ -2,10 +2,12 @@
 
 source config/bootstrap.sh
 
-set -E
-python config/py_init_checker.py --directory .
+set -e
 
-pylint config/ --rcfile config/.pylintrc
-pylint src/ --rcfile config/.pylintrc
-pylint app.py --rcfile config/.pylintrc
+python config/py_init_checker.py --directory config/
+pylint config/
 
+python config/py_init_checker.py --directory src/
+pylint src/
+
+pylint app.py

@@ -1,6 +1,8 @@
 import re
 from typing import Dict, List
 
+from PIL import Image
+
 from src.image_processing.command import Command, CommandParameters
 from src.image_processing.command_parser.command_parser import CommandParser
 from src.image_processing.kernels.kernel_types import KernelTypes
@@ -38,3 +40,6 @@ class PatternCommandParser(CommandParser):
 
             commands_list.append(command)
         return commands_list
+
+    def analyze_image(self, _: Image.Image) -> None:
+        pass

@@ -1,14 +1,24 @@
 import json
+import logging
 import re
 from pathlib import Path
 from typing import Dict, List, Union
 
 import torch
+from PIL import Image
 from transformers import pipeline
 
 from src.image_processing.command import Command, CommandParameters
 from src.image_processing.command_parser.command_parser import CommandParser
 from src.image_processing.kernels.kernel_types import KernelTypes
+from src.utils import (
+    get_average_brightness,
+    get_color_space,
+    get_contrast,
+    get_image_size,
+    get_level_of_detail,
+    get_saturation,
+)
 
 
 def process_json_text(input_text: str) -> str:
@@ -69,25 +79,32 @@ class AICommandParser(CommandParser):
         self._prompter = AIPrompter()
         self._json_pattern = re.compile(r".*(?P<json>\[.*\]).*")
 
+        self._image_parameters: Dict[str, Union[float, str, Dict[str, int]]] = {}
+
         self._model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
         self._pipeline = pipeline(
             "text-generation", model=self._model_name, torch_dtype=torch.float16, device_map="auto"
         )
 
     def _get_llm_output(self, input_text: str) -> List[Dict[str, Union[str, Dict]]]:
-        prompt = self._prompter.prepare_prompt()
-        messages = [
-            {
-                "role": "system",
-                "content": prompt,
-            },
-            {"role": "user", "content": input_text},
-        ]
+        messages = []
+
+        messages.append({"role": "system", "content": self._prompter.prepare_prompt()})
+        if self._image_parameters:
+            messages.append(
+                {
+                    "role": "system",
+                    "content": f"Прими во внимание информацию об исходном изображении: {self._image_parameters}",
+                }
+            )
+        messages.append({"role": "user", "content": input_text})
 
         prompt = self._pipeline.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         outputs = self._pipeline(prompt)
 
         processed_text = process_json_text(outputs[0]["generated_text"])
+        logging.info("Received from LLM: %s", processed_text)
+
         processed_text_match = self._json_pattern.match(processed_text)
 
         if processed_text_match:
@@ -108,3 +125,14 @@ class AICommandParser(CommandParser):
             command_parameters = CommandParameters(**parameters)
             commands.append(Command(kernel_type, command_parameters))
         return commands
+
+    def analyze_image(self, image: Image.Image) -> None:
+        self._image_parameters = {
+            "original_size": get_image_size(image),
+            "average_brightness": get_average_brightness(image),
+            "contrast": get_contrast(image),
+            "color_space": get_color_space(image),
+            "saturation": get_saturation(image),
+            "level_of_detail": get_level_of_detail(image),
+        }
+        logging.info("Original image parameters: %s", self._image_parameters)
