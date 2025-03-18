@@ -1,8 +1,9 @@
 from io import BytesIO
+
 import cv2
 import numpy as np
-from PIL import Image
 import requests
+from PIL import Image
 
 
 def pil_to_cv2(image: Image.Image) -> np.ndarray:
