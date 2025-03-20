@@ -1,5 +1,5 @@
 import torch
-from speech_recognition import SpeechRecognition
+from src.audio2text.speech_recognition import SpeechRecognition
 
 
 def main() -> None:
