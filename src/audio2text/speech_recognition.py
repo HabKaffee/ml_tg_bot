@@ -48,16 +48,16 @@ class SpeechRecognition:
             transcriptions.append(transcription)
         return transcriptions
 
-    def _gen_transcription(self, path_to_file: str) -> str:
+    def _gen_transcription(self, path_to_file: Path) -> str:
         """Generates a transcription for a single audio file."""
-        if not os.path.exists(path_to_file):
-            raise FileNotFoundError(f"No file {path_to_file}")
+        if not path_to_file.is_file():
+            raise FileNotFoundError(f"File '{path_to_file}' not found")
 
         if self.whisper:
             return self.gen_transcription_whisper(path_to_file)
         return self._gen_transcription_wav2vec(path_to_file)
 
-    def _gen_transcription_wav2vec(self, path_to_file: str) -> str:
+    def _gen_transcription_wav2vec(self, path_to_file: Path) -> str:
         speech_array, _ = librosa.load(path_to_file, sr=16_000)
         inputs = self.processor(speech_array, sampling_rate=16_000, return_tensors="pt", padding=True)
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
@@ -67,25 +67,29 @@ class SpeechRecognition:
         transcription = cast(str, decoded[0]) if decoded else ""
         return transcription
 
-    def gen_transcription_whisper(self, path_to_file: str) -> str:
+    def gen_transcription_whisper(self, path_to_file: Path) -> str:
         allowed_formats = {".wav", ".ogg"}
-        _, ext = os.path.splitext(path_to_file)
-        ext = ext.lower()
+
+        if not path_to_file.is_file():
+            raise FileNotFoundError(f"File '{path_to_file}' not found")
+
+        ext = path_to_file.suffix.lower()
         if ext not in allowed_formats:
             raise ValueError(f"Unsupported file format '{ext}'. Allowed formats: {', '.join(allowed_formats)}")
 
         if ext == ".ogg":
             path_to_file = self._ogg_to_wav(path_to_file)
 
-        audio_input, _ = librosa.load(path_to_file, sr=16000)
+        audio_input, _ = librosa.load(str(path_to_file), sr=16000)  # Convert Path to string for librosa
         input_features = self.processor(audio_input, sample_rate=16000, return_tensors="pt").input_features
         input_features = input_features.to(self.device)
         generated_ids = self.model.generate(input_features)
         decoded = self.processor.decode(generated_ids[0], skip_special_tokens=True)
         transcription = cast(str, decoded) if decoded else ""
+
         return transcription
 
-    def _ogg_to_wav(self, path_to_file: str) -> Path:
+    def _ogg_to_wav(self, path_to_file: Path) -> Path:
         timestr = time.strftime("%Y%m%d-%H%M%S")
         data, samplerate = sf.read(path_to_file)
         tmp_path = Path("data/processed_speech")
