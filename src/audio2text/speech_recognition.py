@@ -44,7 +44,7 @@ class SpeechRecognition:
         transcriptions = []
         audio_paths = [os.path.join(folder_to_audio, f"output_{i}.wav") for i in range(num_samples)]
         for audio_path in audio_paths:
-            transcription = self._gen_transcription(audio_path)
+            transcription = self._gen_transcription(Path(audio_path))
             transcriptions.append(transcription)
         return transcriptions
 
