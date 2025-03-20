@@ -85,7 +85,7 @@ class SpeechRecognition:
         transcription = cast(str, decoded) if decoded else ""
         return transcription
 
-    def _ogg_to_wav(self, path_to_file: str) -> str:
+    def _ogg_to_wav(self, path_to_file: str) -> Path:
         timestr = time.strftime("%Y%m%d-%H%M%S")
         data, samplerate = sf.read(path_to_file)
         tmp_path = Path("data/processed_speech")
