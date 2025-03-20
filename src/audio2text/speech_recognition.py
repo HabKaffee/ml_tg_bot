@@ -1,5 +1,6 @@
 import os
 import time
+from pathlib import Path
 from typing import List, cast
 
 import librosa  # pylint: disable=import-error
@@ -18,12 +19,14 @@ class SpeechRecognition:
         self.device = device
         self.whisper = whisper
 
+        model_class = Wav2Vec2ForCTC
+        processor_class = Wav2Vec2Processor
         if whisper:
-            self.model = WhisperForConditionalGeneration.from_pretrained(model_path).to(self.device)
-            self.processor = WhisperProcessor.from_pretrained(processor_path)
-        else:
-            self.model = Wav2Vec2ForCTC.from_pretrained(model_path).to(self.device)
-            self.processor = Wav2Vec2Processor.from_pretrained(processor_path)
+            model_class = WhisperForConditionalGeneration
+            processor_class = WhisperProcessor
+
+        self.model = model_class.from_pretrained(model_path).to(self.device)
+        self.processor = processor_class.from_pretrained(processor_path)
 
     def load_data_golos(self, path_to_audio: str) -> List[str]:
         """Loads test dataset from GOLOS and saves audio samples to files."""
@@ -85,9 +88,9 @@ class SpeechRecognition:
     def _ogg_to_wav(self, path_to_file: str) -> str:
         timestr = time.strftime("%Y%m%d-%H%M%S")
         data, samplerate = sf.read(path_to_file)
-        if not os.path.exists("./temp/"):
-            os.makedirs("./temp/")
-        file_name = f"./temp/{timestr}_wav_transformed.wav"
+        tmp_path = Path("data/processed_speech")
+        (tmp_path / "temp").mkdir(parents=True, exist_ok=True)
+        file_name = tmp_path / f"temp/{timestr}_wav_transformed.wav"
         sf.write(file_name, data, samplerate)
         return file_name
 
