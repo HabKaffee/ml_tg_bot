@@ -33,7 +33,9 @@ class AIPrompter:
     def __init__(self, language: LanguageType = LanguageType.EN) -> None:
         self._basic_prompt = self._prepare_basic_prompt()
         self._language = language
-        self._path_to_few_shot_examples = Path(f"src/image_processing/command_parser/few_shot_examples_{self._language }.json")
+        self._path_to_few_shot_examples = Path(
+            f"src/image_processing/command_parser/few_shot_examples_{self._language}.json"
+        )
         self._few_shot_samples = self._load_few_shot_prompt(self._path_to_few_shot_examples)
 
     @staticmethod

@@ -2,22 +2,24 @@ from tap import Tap
 
 from src.image_processing.command_parser.command_parser import ParserParameters
 from src.image_processing.command_parser.command_parser_creator import CommandParserTypes, get_command_parser
+from src.image_processing.command_parser.language import LanguageType
 from src.image_processing.image_processor import ImageProcessor
 from src.utils import get_random_cat_image
 
 
 class Arguments(Tap):
     command_parser: CommandParserTypes = CommandParserTypes.AI
-    input_text: str = "повернуть на 90 градусов и сделать черно белым, подними немного яркость"
+    input_text: str = "turn image by 90 degrees and make it grayscale, increase brightness a bit"
     analyze_image: bool = False
     num_few_shot_samples: int = -1
+    language: LanguageType = LanguageType.EN
 
 
 def main() -> None:
     args = Arguments(underscores_to_dashes=True).parse_args()
 
     image_processor = ImageProcessor()
-    text_processor = get_command_parser(args.command_parser)
+    text_processor = get_command_parser(args.command_parser)(args.language)
 
     random_cat_image = get_random_cat_image()
     random_cat_image.show()

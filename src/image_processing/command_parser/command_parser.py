@@ -23,10 +23,10 @@ class CommandParser(ABC):
     """
     Interface for command parser
     """
+
     def __init__(self, language: LanguageType = LanguageType.EN):
         super().__init__()
         self.language = language
-
 
     @abstractmethod
     def parse_text(self, text: str, parser_parameters: ParserParameters) -> List[Command]:
