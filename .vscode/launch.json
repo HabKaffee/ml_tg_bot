@@ -12,8 +12,10 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "args": [
+                // "--command-parser", "pattern",
                 "--command-parser", "ai",
-                "--analyze-image"
+                "--analyze-image",
+                "--num-few-shot-samples", "0"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",

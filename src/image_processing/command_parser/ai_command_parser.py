@@ -2,14 +2,14 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, TypeAlias, Union
 
 import torch
 from PIL import Image
 from transformers import pipeline
 
 from src.image_processing.command import Command, CommandParameters
-from src.image_processing.command_parser.command_parser import CommandParser
+from src.image_processing.command_parser.command_parser import CommandParser, ParserParameters
 from src.image_processing.kernels.kernel_types import KernelTypes
 from src.utils import (
     get_average_brightness,
@@ -20,6 +20,9 @@ from src.utils import (
     get_saturation,
 )
 
+FewShotSamples: TypeAlias = List[Dict[str, Union[List[Dict[str, Union[str, int]]]]]]
+ImageParameters: TypeAlias = Dict[str, Union[float, str, Dict[str, int]]]
+
 
 def process_json_text(input_text: str) -> str:
     return input_text.replace("\n", "").replace("'", '"')
@@ -29,14 +32,28 @@ class AIPrompter:
     def __init__(self) -> None:
         self._basic_prompt = self._prepare_basic_prompt()
         self._path_to_few_shot_examples = Path("src/image_processing/command_parser/few_shot_examples.json")
-        self._few_shot_prompt = self._prepare_few_shot_prompt()
+        self._few_shot_samples = self._load_few_shot_prompt(self._path_to_few_shot_examples)
 
-    def _prepare_few_shot_prompt(self) -> str:
-        with self._path_to_few_shot_examples.open(mode="r", encoding="utf-8") as file:
-            few_shot_examples = json.load(file)
+    @staticmethod
+    def _load_few_shot_prompt(path_to_few_shot_examples: Path) -> FewShotSamples:
+        few_shot_samples = []
+        if not path_to_few_shot_examples.exists():
+            logging.warning("There is no file %s with Few-Shot examples", path_to_few_shot_examples)
+            return few_shot_samples
+
+        try:
+            with path_to_few_shot_examples.open(mode="r", encoding="utf-8") as file:
+                few_shot_samples = json.load(file)
+        except json.decoder.JSONDecodeError as exc:
+            logging.warning("Loading file with Few-Shot examples raised %s exception", exc)
+        return few_shot_samples
+
+    @staticmethod
+    def _prepare_few_shot_prompt(few_shot_samples: FewShotSamples, num_few_shot_samples: int = -1) -> str:
+        _num_samples = min(num_few_shot_samples, len(few_shot_samples))
 
         few_shot_prompt = "Examples:\n"
-        for example in few_shot_examples:
+        for example in few_shot_samples[:_num_samples]:
             input_text = example["input"]
             expected_json = example["output"]
             few_shot_prompt += f"Input: {input_text}. Result: {expected_json}.\n"
@@ -60,12 +77,11 @@ class AIPrompter:
         """
         return prompt
 
-    def prepare_prompt(self) -> str:
-        prompt = f"""
-        {self._basic_prompt}
-        ---
-        {self._few_shot_prompt}
-        """
+    def prepare_prompt(self, num_few_shot_samples: int = -1) -> str:
+        prompt = self._basic_prompt
+
+        if num_few_shot_samples != 0:
+            prompt += "\n" + self._prepare_few_shot_prompt(self._few_shot_samples, num_few_shot_samples)
         return prompt
 
 
@@ -79,17 +95,17 @@ class AICommandParser(CommandParser):
         self._prompter = AIPrompter()
         self._json_pattern = re.compile(r".*(?P<json>\[.*\]).*")
 
-        self._image_parameters: Dict[str, Union[float, str, Dict[str, int]]] = {}
+        self._image_parameters: ImageParameters = {}
 
         self._model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
         self._pipeline = pipeline(
             "text-generation", model=self._model_name, torch_dtype=torch.float16, device_map="auto"
         )
 
-    def _get_llm_output(self, input_text: str) -> List[Dict[str, Union[str, Dict]]]:
+    def _get_llm_output(self, input_text: str, num_few_shot_samples: int = -1) -> List[Dict[str, Union[str, Dict]]]:
         messages = []
 
-        messages.append({"role": "system", "content": self._prompter.prepare_prompt()})
+        messages.append({"role": "system", "content": self._prompter.prepare_prompt(num_few_shot_samples)})
         if self._image_parameters:
             messages.append(
                 {
@@ -111,8 +127,12 @@ class AICommandParser(CommandParser):
             return list(json.loads(processed_text_match.group("json")))
         raise ValueError(f"Failed to parse text: {input_text}")
 
-    def parse_text(self, text: str) -> List[Command]:
-        json_command = self._get_llm_output(text)
+    def parse_text(self, text: str, parser_parameters: ParserParameters) -> List[Command]:
+        if parser_parameters.analyze_image and parser_parameters.image_to_analyze is not None:
+            self._image_parameters = self._analyze_image(parser_parameters.image_to_analyze)
+            logging.info("Original image parameters: %s", self._image_parameters)
+
+        json_command = self._get_llm_output(text, parser_parameters.num_few_shot_samples)
 
         commands = []
         for command in json_command:
@@ -126,8 +146,9 @@ class AICommandParser(CommandParser):
             commands.append(Command(kernel_type, command_parameters))
         return commands
 
-    def analyze_image(self, image: Image.Image) -> None:
-        self._image_parameters = {
+    @staticmethod
+    def _analyze_image(image: Image.Image) -> ImageParameters:
+        image_parameters = {
             "original_size": get_image_size(image),
             "average_brightness": get_average_brightness(image),
             "contrast": get_contrast(image),
@@ -135,4 +156,4 @@ class AICommandParser(CommandParser):
             "saturation": get_saturation(image),
             "level_of_detail": get_level_of_detail(image),
         }
-        logging.info("Original image parameters: %s", self._image_parameters)
+        return image_parameters

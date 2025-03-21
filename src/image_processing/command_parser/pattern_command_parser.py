@@ -1,10 +1,8 @@
 import re
 from typing import Dict, List
 
-from PIL import Image
-
 from src.image_processing.command import Command, CommandParameters
-from src.image_processing.command_parser.command_parser import CommandParser
+from src.image_processing.command_parser.command_parser import CommandParser, ParserParameters
 from src.image_processing.kernels.kernel_types import KernelTypes
 
 
@@ -25,7 +23,7 @@ class PatternCommandParser(CommandParser):
             KernelTypes.SHARPEN: r"повысить резкость на (?P<step>-?\d+)",
         }
 
-    def parse_text(self, text: str) -> List[Command]:
+    def parse_text(self, text: str, _: ParserParameters) -> List[Command]:
         text = text.lower()
 
         patterns = self._get_patterns()
@@ -40,6 +38,3 @@ class PatternCommandParser(CommandParser):
 
             commands_list.append(command)
         return commands_list
-
-    def analyze_image(self, _: Image.Image) -> None:
-        pass
