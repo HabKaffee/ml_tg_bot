@@ -5,6 +5,7 @@ from typing import List, Optional
 from PIL import Image
 
 from src.image_processing.command import Command
+from src.image_processing.command_parser.language import LanguageType
 
 
 @dataclass
@@ -22,6 +23,10 @@ class CommandParser(ABC):
     """
     Interface for command parser
     """
+    def __init__(self, language: LanguageType = LanguageType.EN):
+        super().__init__()
+        self.language = language
+
 
     @abstractmethod
     def parse_text(self, text: str, parser_parameters: ParserParameters) -> List[Command]:

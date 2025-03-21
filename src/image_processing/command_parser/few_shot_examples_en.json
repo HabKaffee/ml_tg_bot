@@ -1,0 +1,35 @@
+[
+    {
+        "input": "Turn by 90 degrees and crop to 100 by 150",
+        "output": [
+            {
+                "action": "rotate",
+                "parameters": {
+                    "angle": 90
+                }
+            },
+            {
+                "action": "crop",
+                "parameters": {
+                    "height": 100,
+                    "width": 150
+                }
+            }
+        ]
+    },
+    {
+        "input": "Increase contrast by 10 and make black and white",
+        "output": [
+            {
+                "action": "contrast",
+                "parameters": {
+                    "step": 10
+                }
+            },
+            {
+                "action": "grayscale",
+                "parameters": {}
+            }
+        ]
+    }
+]
