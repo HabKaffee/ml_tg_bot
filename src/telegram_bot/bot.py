@@ -6,6 +6,7 @@ from telegram import InlineKeyboardMarkup, Update, Voice
 from telegram.ext import ContextTypes, ConversationHandler
 
 from src.audio2text.speech_recognition import SpeechRecognition
+from src.image_generation.generation import StableDiffusionPipeline
 from src.image_processing.command_parser.ai_command_parser import AICommandParser
 from src.image_processing.image_processor import ImageProcessor
 from src.sticker_generator.sticker_generator import StickerGenerator
@@ -14,6 +15,7 @@ from .utils import (
     BOT_STATES,
     KEYBOARD,
     PROMPT_IF_CONTINUE_EDIT,
+    PROMPT_IF_CONTINUE_GENERATE,
     PROMPT_IF_CONTINUE_STICKER,
     PROMPT_IF_CONTINUE_TRANSCRIBE,
 )
@@ -31,6 +33,7 @@ class TelegramBot:
         self.audio_processor = audio_processor
         self.image_processor = image_processor
         self.sticker_processor = sticker_processor
+        self.image_generator = StableDiffusionPipeline()
         self.command_parser = AICommandParser()
         self.logger = logger
         self.data_folder = data_folder
@@ -78,7 +81,7 @@ class TelegramBot:
         return BOT_STATES.PHOTO_EDIT
 
     async def audio_to_text_prompt(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
-        """Handles the button click and asks for a photo."""
+        """Handles the button click and asks for a audio."""
         self.logger.info("EVENT: waiting for audio to perform audio2text")
         if update.callback_query:
             query = update.callback_query
@@ -87,6 +90,17 @@ class TelegramBot:
         else:
             self.logger.error("Exception in audio_to_text_prompt")
         return BOT_STATES.AUDIO
+
+    async def generate_image_prompt(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
+        """Handles the button click and asks for a prompt."""
+        self.logger.info("EVENT: waiting for prompt to generate image")
+        if update.callback_query:
+            query = update.callback_query
+            await query.answer()
+            await query.message.reply_text("Please send a prompt to generate image")  # type: ignore[union-attr]
+        else:
+            self.logger.error("Exception in generate_image_prompt")
+        return BOT_STATES.GENERATE
 
     async def photo_to_sticker(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
         """
@@ -239,6 +253,45 @@ class TelegramBot:
 
         return await self.edit_photo_continue(update, context)
 
+    async def generate_image(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
+        """
+        Handler to gathed needed data and call audio to text conversion model
+        """
+        self.logger.info("EVENT: generate_image")
+        if not update.effective_message:
+            self.logger.warning("Update.effective_message is empty")
+            return await self.restart(update, context)
+
+        if not update.effective_user:
+            self.logger.warning("Update.effective_user is empty")
+            return await self.restart(update, context)
+
+        output_image_path = Path(f"{self.data_folder}/{update.effective_user.id}_generated_image.png")
+
+        if update.effective_message and not update.effective_message.text:
+            await update.effective_message.reply_text("No prompt is provided. Please provide one")
+            return await self.generate_image_continue(update, context)
+
+        await update.effective_message.reply_text("Generation in progress...")
+        prompt = update.effective_message.text
+
+        if not prompt:
+            self.logger.error("No prompt provided")
+            return await self.generate_image_continue(update, context)
+
+        generated_image = self.image_generator.generate_image(prompt)
+        if not generated_image:
+            self.logger.error("No image generated.")
+            await update.effective_message.reply_text("An error occured during image generation. Try again")
+
+        generated_image.save(output_image_path)
+
+        with open(output_image_path, "rb") as photo_file:
+            await update.effective_message.reply_document(photo_file, filename="generated.png")
+            self.logger.info("image is generated successfully")
+
+        return await self.generate_image_continue(update, context)
+
     async def photo_to_sticker_continue(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
         """
         Handler to process more photos to sticker or return to menu
@@ -259,7 +312,7 @@ class TelegramBot:
 
     async def edit_photo_continue(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
         """
-        Handler to process more photos to sticker or return to menu
+        Handler to process more photos or return to menu
         """
         self.logger.info("EVENT: edit_photo contunue")
         menu_keyboard = InlineKeyboardMarkup(PROMPT_IF_CONTINUE_EDIT)
@@ -277,19 +330,37 @@ class TelegramBot:
 
     async def audio_to_text_continue(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
         """
-        Handler to process more photos to sticker or return to menu
+        Handler to process more audios or return to menu
         """
-        self.logger.info("EVENT: edit_photo contunue")
+        self.logger.info("EVENT: audio2text contunue")
         menu_keyboard = InlineKeyboardMarkup(PROMPT_IF_CONTINUE_TRANSCRIBE)
 
         if update.message:
-            self.logger.info("Rendered keyboard in continue_edit")
+            self.logger.info("Rendered keyboard in continue_audio")
             await update.message.reply_text(
                 "Do you want to prepare more audios?",
                 reply_markup=menu_keyboard,
             )
         else:
-            self.logger.error("Exception in edit_photo_continue")
+            self.logger.error("Exception in audio2text_continue")
+
+        return BOT_STATES.ACTION_SELECTION
+
+    async def generate_image_continue(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
+        """
+        Handler to generate more images or return to menu
+        """
+        self.logger.info("EVENT: generate_image contunue")
+        menu_keyboard = InlineKeyboardMarkup(PROMPT_IF_CONTINUE_GENERATE)
+
+        if update.message:
+            self.logger.info("Rendered keyboard in continue_")
+            await update.message.reply_text(
+                "Do you want to generate more images?",
+                reply_markup=menu_keyboard,
+            )
+        else:
+            self.logger.error("Exception in generate_image_continue")
 
         return BOT_STATES.ACTION_SELECTION
 

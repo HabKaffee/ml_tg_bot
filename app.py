@@ -36,6 +36,7 @@ def main() -> None:
                 CallbackQueryHandler(bot.audio_to_text_prompt, pattern="^audio|^continue_audio"),
                 CallbackQueryHandler(bot.edit_photo_prompt, pattern="^edit|^continue_edit"),
                 CallbackQueryHandler(bot.photo_to_sticker_prompt, pattern="^sticker|^continue_sticker"),
+                CallbackQueryHandler(bot.generate_image_prompt, pattern="^generate|^continue_generate"),
                 CallbackQueryHandler(bot.cancel, pattern="^cancel"),
                 CallbackQueryHandler(bot.restart, pattern="^return"),
             ],
@@ -48,10 +49,10 @@ def main() -> None:
             BOT_STATES.AUDIO: [
                 MessageHandler(filters.VOICE, bot.audio_to_text),
             ],
+            BOT_STATES.GENERATE: [MessageHandler(filters.TEXT, bot.generate_image)],
         },
         fallbacks=[CommandHandler("restart", bot.restart)],
         allow_reentry=True,
-        conversation_timeout=3600,
     )
 
     app.add_handler(conv_handler)
