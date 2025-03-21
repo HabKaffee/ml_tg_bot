@@ -88,9 +88,24 @@ class TelegramBot:
         else:
             path = f"{self.data_folder}/unknown_user_id_sticker.png"
         await photo.download_to_drive(path)
-        # temporarily echo the file
-        with open(path, "rb") as photo_file:
+
+        input_image_path = Path(f"{self.data_folder}/{update.effective_user.id}_sticker.png")
+        output_image_path = Path(f"{self.data_folder}/{update.effective_user.id}_generated_sticker.png")
+        if not input_image_path.exists():
+            await update.effective_message.reply_text("Please, try again")
+            self.logger.error("Error occured during sticker generation:No data provided.")
+            return await self.restart(update, context)
+        sticker_generator = StickerGenerator()
+        input_image = Image(input_image_path).convert('RGB')
+        result_image = sticker_generator.generate_sticker(input_image)
+        if not result_image:
+            await update.effective_message.reply_test("An error occured during sticker generation")
+            self.logger.error("Error occured during sticker generation:No sticker generated.")
+            return await self.restart(update, context)
+        result_image.save(output_image_path)
+        with open(output_image_path, "rb") as photo_file:
             await update.effective_message.reply_photo(photo_file)
+            self.logger.info("Sticker generated successfully")
 
         return await self.restart(update, context)
 
