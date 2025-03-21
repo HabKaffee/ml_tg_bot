@@ -2,7 +2,7 @@ from tap import Tap
 
 from src.image_processing.command_parser.command_parser import ParserParameters
 from src.image_processing.command_parser.command_parser_creator import CommandParserTypes, get_command_parser
-from src.image_processing.command_parser.language import LanguageType
+from src.image_processing.command_parser.language_package import LanguageType
 from src.image_processing.image_processor import ImageProcessor
 from src.utils import get_random_cat_image
 

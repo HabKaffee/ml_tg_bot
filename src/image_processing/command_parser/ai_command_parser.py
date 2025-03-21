@@ -1,8 +1,7 @@
 import json
 import logging
 import re
-from pathlib import Path
-from typing import Dict, List, TypeAlias, Union
+from typing import Dict, List, Union
 
 import torch
 from PIL import Image
@@ -10,7 +9,12 @@ from transformers import pipeline
 
 from src.image_processing.command import Command, CommandParameters
 from src.image_processing.command_parser.command_parser import CommandParser, ParserParameters
-from src.image_processing.command_parser.language import LanguageType
+from src.image_processing.command_parser.language_package import (
+    FewShotSamples,
+    ImageParameters,
+    LanguageType,
+    get_language_package,
+)
 from src.image_processing.kernels.kernel_types import KernelTypes
 from src.utils import (
     get_average_brightness,
@@ -21,9 +25,6 @@ from src.utils import (
     get_saturation,
 )
 
-FewShotSamples: TypeAlias = List[Dict[str, Union[List[Dict[str, Union[str, int]]]]]]
-ImageParameters: TypeAlias = Dict[str, Union[float, str, Dict[str, int]]]
-
 
 def process_json_text(input_text: str) -> str:
     return input_text.replace("\n", "").replace("'", '"')
@@ -33,24 +34,8 @@ class AIPrompter:
     def __init__(self, language: LanguageType = LanguageType.EN) -> None:
         self._basic_prompt = self._prepare_basic_prompt()
         self._language = language
-        self._path_to_few_shot_examples = Path(
-            f"src/image_processing/command_parser/few_shot_examples_{self._language}.json"
-        )
-        self._few_shot_samples = self._load_few_shot_prompt(self._path_to_few_shot_examples)
-
-    @staticmethod
-    def _load_few_shot_prompt(path_to_few_shot_examples: Path) -> FewShotSamples:
-        few_shot_samples = []
-        if not path_to_few_shot_examples.exists():
-            logging.warning("There is no file %s with Few-Shot examples", path_to_few_shot_examples)
-            return few_shot_samples
-
-        try:
-            with path_to_few_shot_examples.open(mode="r", encoding="utf-8") as file:
-                few_shot_samples = json.load(file)
-        except json.decoder.JSONDecodeError as exc:
-            logging.warning("Loading file with Few-Shot examples raised %s exception", exc)
-        return few_shot_samples
+        self._language_package = get_language_package(self._language)
+        self._few_shot_samples = self._language_package.get_few_shot_examples()
 
     @staticmethod
     def _prepare_few_shot_prompt(few_shot_samples: FewShotSamples, num_few_shot_samples: int = -1) -> str:
@@ -66,35 +51,7 @@ class AIPrompter:
     def _prepare_basic_prompt(self) -> str:
         kernel_keys = KernelTypes.get_keys()
         command_keys = CommandParameters().get_keys()
-
-        if self._language is LanguageType.EN:
-            prompt = f"""
-            You are an intelligent assistant that analyzes text instructions for image processing and converts them into JSON format.
-
-            Input format:
-            You are given text that describes how to change the image.
-
-            Output format:
-            You should return exactly one JSON object as a list of instructions.
-            Each instruction should contain two keys:
-            1. `"action"` – the name of the action from the set {kernel_keys}.
-            2. `"parameters"` – a dictionary with the parameters needed to perform the action from the set {command_keys}
-            """
-        elif self._language is LanguageType.RU:
-            prompt = f"""
-            Ты — интеллектуальный ассистент, который анализирует текстовые инструкции по обработке изображений и преобразует их в JSON-формат.
-
-            Формат входных данных:
-            Тебе дается текст, описывающий, как нужно изменить изображение.
-
-            Формат выходных данных:
-            Ты должен вернуть ровно один JSON-объект в виде списка с инструкциями.
-            Каждая инструкция должна содержать два ключа:
-            1. `"action"` – название действия из набора {kernel_keys}.
-            2. `"parameters"` – словарь с параметрами, необходимыми для выполнения действия из набора {command_keys}
-            """
-        else:
-            raise ValueError(f"Unsupported language: {self._language})")
+        prompt = self._language_package.get_basic_prompt(kernel_keys, command_keys)
         return prompt
 
     def prepare_prompt(self, num_few_shot_samples: int = -1) -> str:
@@ -127,12 +84,7 @@ class AICommandParser(CommandParser):
 
         messages.append({"role": "system", "content": self._prompter.prepare_prompt(num_few_shot_samples)})
         if self._image_parameters:
-            if self._language is LanguageType.EN:
-                image_prompt = f"Take into account the information about the original image: {self._image_parameters}"
-            elif self._language is LanguageType.RU:
-                image_prompt = f"Прими во внимание информацию об исходном изображении: {self._image_parameters}"
-            else:
-                raise ValueError(f"Unsupported language: {self._language}")
+            image_prompt = self._language_package.get_image_analysis_prompt(self._image_parameters)
 
             messages.append({"role": "system", "content": image_prompt})
 
@@ -171,7 +123,7 @@ class AICommandParser(CommandParser):
 
     @staticmethod
     def _analyze_image(image: Image.Image) -> ImageParameters:
-        image_parameters = {
+        image_parameters: ImageParameters = {
             "original_size": get_image_size(image),
             "average_brightness": get_average_brightness(image),
             "contrast": get_contrast(image),
