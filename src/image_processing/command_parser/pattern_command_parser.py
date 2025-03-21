@@ -13,19 +13,29 @@ class PatternCommandParser(CommandParser):
     """
 
     def _get_patterns(self) -> Dict[KernelTypes, str]:
-        patterns = {}
-        for kernel_type_alias, command in self._language_package["patterns"].items():
-            kernel_type = KernelTypes(kernel_type_alias)
-            patterns[kernel_type] = command
-        return patterns
-        # KernelTypes.BLUR: r"размытие с радиусом (?P<step>-?\d+)",
-        # KernelTypes.CONTRAST: r"изменить контрастность на (?P<step>-?\d+)",
-        # KernelTypes.CROP: r"обрезать до (?P<height>\d+)x(?P<width>\d+)",
-        # KernelTypes.GRAYSCALE: r"преобразовать в черно-белый",
-        # KernelTypes.INVERT: r"инвертировать цвета|инвертировать",
-        # KernelTypes.RESIZE: r"изменить размер до (?P<height>\d+)x(?P<width>\d+)",
-        # KernelTypes.ROTATE: r"повернуть на (?P<angle>-?\d+) градусов",
-        # KernelTypes.SHARPEN: r"повысить резкость на (?P<step>-?\d+)",
+        if self.language is LanguageType.EN:
+            return {
+                KernelTypes.BLUR: r"blur with radius (?P<step>-?\d+)",
+                KernelTypes.CONTRAST: r"change contrast by (?P<step>-?\d+)",
+                KernelTypes.CROP: r"crop to (?P<height>\d+)x(?P<width>\d+)",
+                KernelTypes.GRAYSCALE: r"convert to grayscale",
+                KernelTypes.INVERT: r"invert colors|invert",
+                KernelTypes.RESIZE: r"resize to (?P<height>\d+)x(?P<width>\d+)",
+                KernelTypes.ROTATE: r"rotate by (?P<angle>-?\d+) degrees",
+                KernelTypes.SHARPEN: r"sharpen by (?P<step>-?\d+)",
+            }
+        if self.language is LanguageType.RU:
+            return {
+                KernelTypes.BLUR: r"размытие с радиусом (?P<step>-?\d+)",
+                KernelTypes.CONTRAST: r"изменить контрастность на (?P<step>-?\d+)",
+                KernelTypes.CROP: r"обрезать до (?P<height>\d+)x(?P<width>\d+)",
+                KernelTypes.GRAYSCALE: r"преобразовать в черно-белый",
+                KernelTypes.INVERT: r"инвертировать цвета|инвертировать",
+                KernelTypes.RESIZE: r"изменить размер до (?P<height>\d+)x(?P<width>\d+)",
+                KernelTypes.ROTATE: r"повернуть на (?P<angle>-?\d+) градусов",
+                KernelTypes.SHARPEN: r"повысить резкость на (?P<step>-?\d+)",
+            }
+        raise ValueError(f"Unsupported language: {self.language}")
 
     def parse_text(self, text: str, _: ParserParameters) -> List[Command]:
         text = text.lower()
