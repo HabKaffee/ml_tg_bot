@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Dict, List, TypeAlias, Union
+from typing import Collection, Dict, List, Sequence, TypeAlias, Union
 
 from src.image_processing.kernels.kernel_types import KernelTypes
 
@@ -10,7 +10,7 @@ class LanguageType(Enum):
     EN = "en"
 
 
-FewShotSamples: TypeAlias = List[Dict[str, Union[List[Dict[str, Union[str, int]]]]]]
+FewShotSamples: TypeAlias = List[Dict[str, Sequence[Collection[str]]]]
 ImageParameters: TypeAlias = Dict[str, Union[float, str, Dict[str, int]]]
 
 
@@ -64,7 +64,7 @@ class LanguagePackageEN(LanguagePackage):
         """
 
     @staticmethod
-    def get_few_shot_examples():
+    def get_few_shot_examples() -> FewShotSamples:
         examples = [
             {
                 "input": "Turn by 90 degrees and crop to 100 by 150",
@@ -119,7 +119,7 @@ class LanguagePackageRU(LanguagePackage):
         """
 
     @staticmethod
-    def get_few_shot_examples():
+    def get_few_shot_examples() -> FewShotSamples:
         examples = [
             {
                 "input": "Повернуть на 90 градусов и обрезать до 100 на 150",
@@ -147,4 +147,4 @@ def get_language_package(language: LanguageType) -> LanguagePackage:
     language_map = {LanguageType.EN: LanguagePackageEN, LanguageType.RU: LanguagePackageRU}
     if language not in language_map:
         raise ValueError(f"Unsupported language: {language}")
-    return language_map[language]
+    return language_map[language]()

@@ -9,7 +9,12 @@ from transformers import pipeline
 
 from src.image_processing.command import Command, CommandParameters
 from src.image_processing.command_parser.command_parser import CommandParser, ParserParameters
-from src.image_processing.command_parser.language_package import FewShotSamples, ImageParameters, LanguageType, get_language_package
+from src.image_processing.command_parser.language_package import (
+    FewShotSamples,
+    ImageParameters,
+    LanguageType,
+    get_language_package,
+)
 from src.image_processing.kernels.kernel_types import KernelTypes
 from src.utils import (
     get_average_brightness,
@@ -118,7 +123,7 @@ class AICommandParser(CommandParser):
 
     @staticmethod
     def _analyze_image(image: Image.Image) -> ImageParameters:
-        image_parameters = {
+        image_parameters: ImageParameters = {
             "original_size": get_image_size(image),
             "average_brightness": get_average_brightness(image),
             "contrast": get_contrast(image),
