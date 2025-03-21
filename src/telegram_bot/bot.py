@@ -59,7 +59,9 @@ class TelegramBot:
         if update.callback_query:
             query = update.callback_query
             await query.answer()
-            await query.message.reply_text("Please send a photo to prepare sticker. For correct sticker, please, use photo with an object placed in the center")  # type: ignore[union-attr]
+            await query.message.reply_text(  # type: ignore[union-attr]
+                "Please send a photo to prepare sticker. Use photo with an object placed in the center"
+            )
         else:
             self.logger.error("Exception in photo_to_sticker_prompt")
         return BOT_STATES.PHOTO_STICKER
@@ -102,9 +104,18 @@ class TelegramBot:
         await update.effective_message.reply_text("Image is being processed. Please wait...")
 
         photo = await update.effective_message.photo[-1].get_file()
+
+        input_image_path = None
+        output_image_path = None
+
         if update.effective_user:
             input_image_path = Path(f"{self.data_folder}/{update.effective_user.id}_sticker.png")
             output_image_path = Path(f"{self.data_folder}/{update.effective_user.id}_sticker_generated.png")
+
+        if not input_image_path or not output_image_path:
+            self.logger.error("Input and/or output image path is not set!")
+            await update.effective_message.reply_text("Internal error occured. Please try again.")
+            return await self.photo_to_sticker_continue(update, context)
 
         await photo.download_to_drive(input_image_path)
 
@@ -162,7 +173,9 @@ class TelegramBot:
 
         return await self.audio_to_text_continue(update, context)
 
-    async def edit_photo(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> BOT_STATES:
+    async def edit_photo(  # pylint: disable=too-many-return-statements
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> BOT_STATES:
         """
         Handler to gathed needed data and call picture edit model
         """
@@ -187,11 +200,18 @@ class TelegramBot:
             )
             return await self.edit_photo_continue(update, context)
 
-        self.logger.info("%s", description)
+        input_image_path = None
+        output_image_path = None
 
         if update.effective_user:
             input_image_path = Path(f"{self.data_folder}/{update.effective_user.id}_edit.png")
             output_image_path = Path(f"{self.data_folder}/{update.effective_user.id}_edited_photo.png")
+
+        if not input_image_path or not output_image_path:
+            self.logger.error("Input and/or output image path is not set!")
+            await update.effective_message.reply_text("Internal error occured. Please try again.")
+            return await self.edit_photo_continue(update, context)
+
         await photo.download_to_drive(input_image_path)
 
         if not input_image_path.exists():
@@ -202,7 +222,7 @@ class TelegramBot:
         input_image = Image.open(input_image_path).convert("RGB")
         commands = self.command_parser.parse_text(description)
 
-        self.logger.info("Edit photo commands: [%s]" % commands)
+        self.logger.info("%s -> %s", description, commands)
         await update.effective_message.reply_text(f"Processing image with command: '{description}'")
 
         edited_photo = self.image_processor.get_processed_image(image=input_image, command_queue=commands)
