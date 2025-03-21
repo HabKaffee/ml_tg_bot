@@ -24,7 +24,7 @@ class PatternCommandParser(CommandParser):
                 KernelTypes.ROTATE: r"rotate by (?P<angle>-?\d+) degrees",
                 KernelTypes.SHARPEN: r"sharpen by (?P<step>-?\d+)",
             }
-        elif self.language is LanguageType.RU:
+        if self.language is LanguageType.RU:
             return {
                 KernelTypes.BLUR: r"размытие с радиусом (?P<step>-?\d+)",
                 KernelTypes.CONTRAST: r"изменить контрастность на (?P<step>-?\d+)",
@@ -35,8 +35,7 @@ class PatternCommandParser(CommandParser):
                 KernelTypes.ROTATE: r"повернуть на (?P<angle>-?\d+) градусов",
                 KernelTypes.SHARPEN: r"повысить резкость на (?P<step>-?\d+)",
             }
-        else:
-            raise ValueError(f"Unsupported language: {self.language}")
+        raise ValueError(f"Unsupported language: {self.language}")
 
     def parse_text(self, text: str, _: ParserParameters) -> List[Command]:
         text = text.lower()
