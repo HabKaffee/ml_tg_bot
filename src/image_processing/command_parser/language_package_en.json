@@ -1,0 +1,13 @@
+{
+    "basic_prompt": "You are an intelligent assistant that analyzes text instructions for image processing and converts them into JSON format.\\nInput format:\\nYou are given text that describes how to change the image.\\nOutput format:\\nYou should return exactly one JSON object as a list of instructions.\\nEach instruction should contain two keys:\\n1. \`action\` – the name of the action from the set {kernel_keys}.\\n2. \`parameters\` – a dictionary with the parameters needed to perform the action from the set {command_keys}.",
+    "patterns": {
+        "blur": "blur with radius (?P<step>-?\\d+)",
+        "contrast": "change contrast by (?P<step>-?\\d+)",
+        "crop": "crop to (?P<height>\\d+)x(?P<width>\\d+)",
+        "grayscale": "convert to grayscale",
+        "invert": "invert colors|invert",
+        "resize": "resize to (?P<height>\\d+)x(?P<width>\\d+)",
+        "rotate": "rotate by (?P<angle>-?\\d+) degrees",
+        "sharpen": "sharpen by (?P<step>-?\\d+)"
+    }
+}

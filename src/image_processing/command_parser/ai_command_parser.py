@@ -67,6 +67,8 @@ class AIPrompter:
         kernel_keys = KernelTypes.get_keys()
         command_keys = CommandParameters().get_keys()
 
+        prompt = self._language_package["basic_prompt"]
+
         if self._language is LanguageType.EN:
             prompt = f"""
             You are an intelligent assistant that analyzes text instructions for image processing and converts them into JSON format.
