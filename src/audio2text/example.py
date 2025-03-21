@@ -13,7 +13,7 @@ def main() -> None:
     device = torch.distributed.get_backend()
     speech_rec = SpeechRecognition(model_path=MODEL_PATH, processor_path=PROCESSOR_PATH, device=device, whisper=True)
 
-    generated_transcription_wh = speech_rec.gen_transcription_whisper(Path("./audio_files/Example.ogg"))
+    generated_transcription_wh = speech_rec.gen_transcription(Path("./audio_files/Example.ogg"))
     print(generated_transcription_wh)
 
 

@@ -37,7 +37,7 @@ def main() -> None:
                 CallbackQueryHandler(bot.edit_photo_prompt, pattern="^edit|^continue_edit"),
                 CallbackQueryHandler(bot.photo_to_sticker_prompt, pattern="^sticker|^continue_sticker"),
                 CallbackQueryHandler(bot.cancel, pattern="^cancel"),
-                CallbackQueryHandler(bot.restart, pattern="^return")
+                CallbackQueryHandler(bot.restart, pattern="^return"),
             ],
             BOT_STATES.PHOTO_EDIT: [
                 MessageHandler(filters.PHOTO, bot.edit_photo),
