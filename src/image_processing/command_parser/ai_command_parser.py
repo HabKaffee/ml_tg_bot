@@ -9,7 +9,7 @@ from transformers import pipeline
 
 from src.image_processing.command import Command, CommandParameters
 from src.image_processing.command_parser.command_parser import CommandParser, ParserParameters
-from src.image_processing.command_parser.language_package import FewShotSamples, ImageParameters, LanguageType
+from src.image_processing.command_parser.language_package import FewShotSamples, ImageParameters, LanguageType, get_language_package
 from src.image_processing.kernels.kernel_types import KernelTypes
 from src.utils import (
     get_average_brightness,
@@ -29,6 +29,7 @@ class AIPrompter:
     def __init__(self, language: LanguageType = LanguageType.EN) -> None:
         self._basic_prompt = self._prepare_basic_prompt()
         self._language = language
+        self._language_package = get_language_package(self._language)
         self._few_shot_samples = self._language_package.get_few_shot_examples()
 
     @staticmethod

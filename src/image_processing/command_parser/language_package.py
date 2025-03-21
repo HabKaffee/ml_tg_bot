@@ -30,7 +30,7 @@ class LanguagePackage(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_image_analysis_prompt() -> str: ...
+    def get_image_analysis_prompt(image_parameters: ImageParameters) -> str: ...
 
 
 class LanguagePackageEN(LanguagePackage):
