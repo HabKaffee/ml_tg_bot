@@ -15,7 +15,10 @@ from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor, WhisperForConditiona
 
 
 class SpeechRecognition:
-    def __init__(self, model_path: str, processor_path: str, device: str = "cpu", whisper: bool = False):
+    def __init__(self, model_path: str = "openai/whisper-large-v2",
+                 processor_path: str = "openai/whisper-large-v2",
+                 device: str = "cpu",
+                 whisper: bool = False):
         self.device = device
         self.whisper = whisper
 
