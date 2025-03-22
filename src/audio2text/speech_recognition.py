@@ -15,8 +15,13 @@ from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor, WhisperForConditiona
 
 
 class SpeechRecognition:
-    def __init__(self, model_path: str, processor_path: str, device: str = "cpu", whisper: bool = False):
-        self.device = device
+    def __init__(
+        self,
+        model_path: str = "openai/whisper-small",
+        processor_path: str = "openai/whisper-small",
+        whisper: bool = True,
+    ):
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.whisper = whisper
 
         model_class = Wav2Vec2ForCTC
@@ -44,17 +49,17 @@ class SpeechRecognition:
         transcriptions = []
         audio_paths = [os.path.join(folder_to_audio, f"output_{i}.wav") for i in range(num_samples)]
         for audio_path in audio_paths:
-            transcription = self._gen_transcription(Path(audio_path))
+            transcription = self.gen_transcription(Path(audio_path))
             transcriptions.append(transcription)
         return transcriptions
 
-    def _gen_transcription(self, path_to_file: Path) -> str:
+    def gen_transcription(self, path_to_file: Path) -> str:
         """Generates a transcription for a single audio file."""
         if not path_to_file.is_file():
             raise FileNotFoundError(f"File '{path_to_file}' not found")
 
         if self.whisper:
-            return self.gen_transcription_whisper(path_to_file)
+            return self._gen_transcription_whisper(path_to_file)
         return self._gen_transcription_wav2vec(path_to_file)
 
     def _gen_transcription_wav2vec(self, path_to_file: Path) -> str:
@@ -67,7 +72,7 @@ class SpeechRecognition:
         transcription = cast(str, decoded[0]) if decoded else ""
         return transcription
 
-    def gen_transcription_whisper(self, path_to_file: Path) -> str:
+    def _gen_transcription_whisper(self, path_to_file: Path) -> str:
         allowed_formats = {".wav", ".ogg"}
 
         if not path_to_file.is_file():
@@ -81,7 +86,7 @@ class SpeechRecognition:
             path_to_file = self._ogg_to_wav(path_to_file)
 
         audio_input, _ = librosa.load(str(path_to_file), sr=16000)  # Convert Path to string for librosa
-        input_features = self.processor(audio_input, sample_rate=16000, return_tensors="pt").input_features
+        input_features = self.processor(audio_input, sampling_rate=16000, return_tensors="pt").input_features
         input_features = input_features.to(self.device)
         generated_ids = self.model.generate(input_features)
         decoded = self.processor.decode(generated_ids[0], skip_special_tokens=True)
