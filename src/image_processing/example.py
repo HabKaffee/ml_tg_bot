@@ -9,7 +9,7 @@ from src.utils import get_random_cat_image
 
 class Arguments(Tap):
     command_parser: CommandParserTypes = CommandParserTypes.AI
-    input_text: str = "turn image by 90 degrees and make it grayscale, increase brightness a bit"
+    input_text: str = "turn image by 90 degrees and make it grayscale"
     analyze_image: bool = False
     num_few_shot_samples: int = -1
     language: LanguageType = LanguageType.EN

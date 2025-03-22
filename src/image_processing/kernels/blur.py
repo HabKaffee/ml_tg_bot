@@ -21,5 +21,7 @@ class BlurImage(Kernel):
             image: np.ndarray image
         """
         ksize = int(params.step)
+        if ksize % 2 == 0:
+            ksize += 1
         image = cv2.GaussianBlur(image, (ksize, ksize), 0)
         return image

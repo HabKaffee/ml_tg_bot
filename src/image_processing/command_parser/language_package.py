@@ -38,13 +38,13 @@ class LanguagePackageEN(LanguagePackage):
     @staticmethod
     def get_patters() -> Dict[KernelTypes, str]:
         return {
-            KernelTypes.BLUR: r"blur with radius (?P<step>-?\d+)",
-            KernelTypes.CONTRAST: r"change contrast by (?P<step>-?\d+)",
+            KernelTypes.BLUR: r"blur (with radius|by) (?P<step>-?\d+)",
+            KernelTypes.CONTRAST: r"contrast by (?P<step>-?\d+)",
             KernelTypes.CROP: r"crop to (?P<height>\d+)x(?P<width>\d+)",
-            KernelTypes.GRAYSCALE: r"convert to grayscale",
-            KernelTypes.INVERT: r"invert colors|invert",
+            KernelTypes.GRAYSCALE: r"(grayscale|black and white)",
+            KernelTypes.INVERT: r"invert( color.|)",
             KernelTypes.RESIZE: r"resize to (?P<height>\d+)x(?P<width>\d+)",
-            KernelTypes.ROTATE: r"rotate by (?P<angle>-?\d+) degrees",
+            KernelTypes.ROTATE: r"(rotate|turn) (image|) by (?P<angle>-?\d+) (degrees|)",
             KernelTypes.SHARPEN: r"sharpen by (?P<step>-?\d+)",
         }
 

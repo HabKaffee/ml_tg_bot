@@ -16,12 +16,9 @@ class PatternCommandParser(CommandParser):
         patterns = self._language_package.get_patters()
         commands_list = []
         for command_type, pattern in patterns.items():
-            match = re.match(pattern, text)
-            if match is None:
-                continue
-
-            parameters = CommandParameters(**match.groupdict())
-            command = Command(command_type, parameters)
-
-            commands_list.append(command)
+            matches = re.finditer(pattern, text)
+            for match in matches:
+                parameters = CommandParameters(**match.groupdict())
+                command = Command(command_type, parameters)
+                commands_list.append(command)
         return commands_list
