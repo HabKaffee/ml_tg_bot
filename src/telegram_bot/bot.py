@@ -7,7 +7,9 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 from src.audio2text.speech_recognition import SpeechRecognition
 from src.image_generation.generation import StableDiffusionPipeline
-from src.image_processing.command_parser.ai_command_parser import AICommandParser
+from src.image_processing.command_parser.command_parser import ParserParameters
+from src.image_processing.command_parser.command_parser_creator import CommandParserTypes, get_command_parser
+from src.image_processing.command_parser.language_package import LanguageType
 from src.image_processing.image_processor import ImageProcessor
 from src.sticker_generator.sticker_generator import StickerGenerator
 
@@ -22,19 +24,26 @@ from .utils import (
 
 
 class TelegramBot:
-    def __init__(  # pylint: disable=too-many-positional-arguments
+    def __init__(  # pylint: disable=too-many-positional-arguments, too-many-arguments
         self,
         audio_processor: SpeechRecognition,
         image_processor: ImageProcessor,
         sticker_processor: StickerGenerator,
         logger: Logger,
         data_folder: Path = Path("data/"),
+        num_few_shot_samples: int = -1,
+        analyze_image: bool = False,
     ) -> None:
         self.audio_processor = audio_processor
         self.image_processor = image_processor
         self.sticker_processor = sticker_processor
         self.image_generator = StableDiffusionPipeline()
-        self.command_parser = AICommandParser()
+        self.command_parser = get_command_parser(CommandParserTypes.PATTERN)(LanguageType.EN)
+        self.parsing_parameters = ParserParameters(
+            num_few_shot_samples=num_few_shot_samples,
+            analyze_image=analyze_image,
+            image_to_analyze=None,
+        )
         self.logger = logger
         self.data_folder = data_folder
 
@@ -235,7 +244,11 @@ class TelegramBot:
             return await self.photo_to_sticker_continue(update, context)
 
         input_image = Image.open(input_image_path).convert("RGB")
-        commands = self.command_parser.parse_text(description)
+
+        if self.parsing_parameters.analyze_image:
+            self.parsing_parameters.image_to_analyze = input_image
+
+        commands = self.command_parser.parse_text(description, self.parsing_parameters)
 
         self.logger.info("%s -> %s", description, commands)
         await update.effective_message.reply_text(f"Processing image with command: '{description}'")
