@@ -17,12 +17,11 @@ from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor, WhisperForConditiona
 class SpeechRecognition:
     def __init__(
         self,
-        model_path: str = "openai/whisper-large-v2",
-        processor_path: str = "openai/whisper-large-v2",
-        device: str = "cpu",
+        model_path: str = "openai/whisper-small",
+        processor_path: str = "openai/whisper-small",
         whisper: bool = True,
     ):
-        self.device = device
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.whisper = whisper
 
         model_class = Wav2Vec2ForCTC

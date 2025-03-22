@@ -63,7 +63,8 @@ class TelegramBot:
             query = update.callback_query
             await query.answer()
             await query.message.reply_text(  # type: ignore[union-attr]
-                "Please send a photo to prepare sticker. Use photo with an object placed in the center"
+                "Please send a photo to prepare sticker. "
+                "Use photo with an object placed in the center. Send photo 1 by 1"
             )
         else:
             self.logger.error("Exception in photo_to_sticker_prompt")
