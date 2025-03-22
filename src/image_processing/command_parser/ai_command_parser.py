@@ -32,9 +32,9 @@ def process_json_text(input_text: str) -> str:
 
 class AIPrompter:
     def __init__(self, language: LanguageType = LanguageType.EN) -> None:
-        self._basic_prompt = self._prepare_basic_prompt()
         self._language = language
         self._language_package = get_language_package(self._language)
+        self._basic_prompt = self._prepare_basic_prompt()
         self._few_shot_samples = self._language_package.get_few_shot_examples()
 
     @staticmethod
