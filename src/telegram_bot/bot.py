@@ -286,7 +286,7 @@ class TelegramBot:
             await update.effective_message.reply_text("No prompt is provided. Please provide one")
             return await self.generate_image_continue(update, context)
 
-        await update.effective_message.reply_text("Generation in progress...")
+        await update.effective_message.reply_text("Generation in progress... It may take a while. You'll get notified")
         prompt = update.effective_message.text
 
         if not prompt:

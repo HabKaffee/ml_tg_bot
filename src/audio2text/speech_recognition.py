@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 from typing import List, cast
 
-import librosa  # pylint: disable=import-error
+import librosa
 import numpy as np
 import soundfile as sf
 import torch
