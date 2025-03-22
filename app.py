@@ -28,7 +28,7 @@ def main() -> None:
     image_processor = ImageProcessor()
     sticker_generator = StickerGenerator()
 
-    bot = TelegramBot(audio_processor, image_processor, sticker_generator, logger, data_folder)
+    bot = TelegramBot(audio_processor, image_processor, sticker_generator, logger, data_folder, num_few_shot_samples=-1)
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", bot.start)],
         states={

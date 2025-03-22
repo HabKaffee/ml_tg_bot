@@ -12,8 +12,8 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "args": [
-                "--command-parser", "ai",
-                "--analyze-image"
+                "--command-parser", "pattern",
+                "--input-text", "blur by 2, contrast by 1, crop to 300x300, grayscale, invert, resize to 100x200, rotate by 90, sharpen by 1",
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
